@@ -1,0 +1,31 @@
+------ Command line values ------
+InFolder: data/ChileHomogeneous_Scen1/Hom_Fuel_3/ 
+OutFolder: data/ChileHomogeneous_Scen1/Hom_Fuel_3/Resultados/ 
+WeatherOpt: rows 
+HarvestPlan:  
+Ignitions: 1 
+OutputGrids: 1 
+TotalYears: 1 
+TotalSims: 1 
+NWeatherFiles: 1 
+FirePeriodLength: 1.0 
+IgnitionRadius: 0 
+ROSThreshold: 0.1 
+HFIThreshold: 0.1 
+HFactor: 1.0 
+FFactor: 1.0 
+BFactor: 1.0 
+EFactor: 1.0 
+ROS-CV: 0.0 
+seed: 123 
+Forest DataFrame from instance data/ChileHomogeneous_Scen1/Hom_Fuel_3/Data.csv
+Number of cells: 1600
+
+Weather DataFrame from instance data/ChileHomogeneous_Scen1/Hom_Fuel_3/Weather.csv
+
+Selected ignition point for Year 1, sim 1: 780
+----------------------------- Results -----------------------------
+Total Available Cells:    1088 - % of the Forest: 68%
+Total Burnt Cells:        512 - % of the Forest: 32%
+Total Non-Burnable Cells: 0 - % of the Forest: 0%
+Total Harvested Cells: 0 - % of the Forest: 0%

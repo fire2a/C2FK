@@ -1,0 +1,10 @@
+numpy
+pandas
+matplotlib
+seaborn
+pprint
+imread
+tqdm
+nlopt
+opencv
+deap
