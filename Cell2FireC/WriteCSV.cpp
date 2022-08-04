@@ -181,7 +181,33 @@ void CSVWriter::printCSVDouble_V2(int rows, int cols, std::vector<double> networ
 
 
 
-void CSVWriter::printASCII(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<int> statusCells)
+void CSVWriter::printASCII(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<float> statusCells)
+{
+	// Create a rowVector for printing
+	std::vector<float> rowVector;
+
+	// Adding vector to CSV File
+	int r, c;
+	// Add header to ascii file
+
+	this->asciiHeader(rows, cols, xllcorner, yllcorner, cellside);
+
+	// Printing rows (output)
+	for (r = 0; r < rows; r++) {
+		for (c = 0; c < cols; c++) {
+
+			std::vector<float>::const_iterator first = statusCells.begin() + c + r * cols;
+			std::vector<float>::const_iterator last = statusCells.begin() + c + r * cols + cols;
+			std::vector<float> rowVector(first, last);
+
+			this->addDatainRow(rowVector.begin(), rowVector.end());
+			c += cols;
+		}
+	}
+
+}
+
+void CSVWriter::printASCIIInt(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<int> statusCells)
 {
 	// Create a rowVector for printing
 	std::vector<int> rowVector;
@@ -205,321 +231,6 @@ void CSVWriter::printASCII(int rows, int cols, double xllcorner, double yllcorne
 		}
 	}
 
-}
-
-
-void CSVWriter::printRosAscii(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<double> network, std::vector<int> statusCells)
-{
-	bool outs = false;
-	std::ofstream ofs(this->fileName, std::ofstream::out);
-	// Adding vector to CSV File
-	int r, c;
-	// Add header to ascii file
-		//first line: coles
-	ofs << "ncols";
-	ofs << this->delimeter;
-	ofs << cols;
-	ofs << "\n";
-	//second line: rows
-	ofs << "nrows";
-	ofs << this->delimeter;
-	ofs << rows;
-	ofs << "\n";
-	//third line: xllcorner
-	ofs << "xllcorner";
-	ofs << this->delimeter;
-	ofs << xllcorner;
-	ofs << "\n";
-	//fourth line: yllcorner
-	ofs << "yllcorner";
-	ofs << this->delimeter;
-	ofs << yllcorner;
-	ofs << "\n";
-	//cellsize
-	ofs << "cellsize";
-	ofs << this->delimeter;
-	ofs << cellside;
-	ofs << "\n";
-	//NODATA_value
-	ofs << "NODATA_value";
-	ofs << this->delimeter;
-	ofs << -9999;
-	ofs << "\n";
-	this->linesCount++;
-	double hit_ros;
-	double min_time;
-	for (int r = 0; r < rows; r++)
-	{
-		for (int c = 0; c < cols; c++)
-		{
-			hit_ros = 0; //default hit ros
-			min_time = 9999999999;
-			if (statusCells[c + r * cols] == 1) {//if the cell is burnt or burning
-				for (int it = 1; it <= network.size(); it = it + 4) {//we iterate over the message file
-					if ((network[it] == (c + r * cols + 1))) { //if the destiny node of messages is the selected cell 
-						if ((network[it + 1]) < min_time) {//if the time of hitting is the lower
-							min_time = network[it + 1];//we update hit time
-							hit_ros = network[it + 2];//we update the hit ros
-						}
-					}
-				}
-			}
-			if (c == cols - 1) { //if it is the last member of a row
-				ofs << hit_ros; //we save the hit ros value
-			}
-			else {
-				ofs << hit_ros << this->delimeter;
-			}
-		}
-		ofs << "\n";
-	}
-	// Close file 
-	ofs.close();
-}
-
-
-void CSVWriter::printIntensityAscii(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<float> crownMetrics, std::vector<int> statusCells)
-{
-	bool outs = false;
-	std::ofstream ofs(this->fileName, std::ofstream::out);
-	// Adding vector to CSV File
-	int r, c;
-	// Add header to ascii file
-		//first line: coles
-	ofs << "ncols";
-	ofs << this->delimeter;
-	ofs << cols;
-	ofs << "\n";
-	//second line: rows
-	ofs << "nrows";
-	ofs << this->delimeter;
-	ofs << rows;
-	ofs << "\n";
-	//third line: xllcorner
-	ofs << "xllcorner";
-	ofs << this->delimeter;
-	ofs << xllcorner;
-	ofs << "\n";
-	//fourth line: yllcorner
-	ofs << "yllcorner";
-	ofs << this->delimeter;
-	ofs << yllcorner;
-	ofs << "\n";
-	//cellsize
-	ofs << "cellsize";
-	ofs << this->delimeter;
-	ofs << cellside;
-	ofs << "\n";
-	//NODATA_value
-	ofs << "NODATA_value";
-	ofs << this->delimeter;
-	ofs << -9999;
-	ofs << "\n";
-	this->linesCount++;
-	double intensity;
-	double max_ros;
-	for (int r = 0; r < rows; r++)
-	{
-		for (int c = 0; c < cols; c++)
-		{
-			intensity = 0; //default hit ros
-			max_ros = 0;
-			bool origin = false;
-			bool destiny = false;
-			int destiny_it;
-			if (statusCells[c + r * cols] == 1) {//if the cell is burnt or burning
-				for (int it = 0; it <= crownMetrics.size(); it = it + 9) {//we iterate over the message file
-					if (crownMetrics[it] == (c + r * cols + 1)) { //if the destiny node of messages is the selected cell 
-						if ((crownMetrics[it + 2]) > max_ros) {//if the time of hitting is the lower
-							max_ros = crownMetrics[it + 2];//we update hit time
-							intensity = crownMetrics[it + 3];//we update the hit ros
-						}
-						origin = true;
-					}
-					if (crownMetrics[it + 1] == (c + r * cols + 1)) {
-						destiny = true;
-						destiny_it = it;
-					}
-				}
-				if ((destiny) && (!origin)) {
-					intensity = crownMetrics[destiny_it + 4];
-				}
-			}
-			if (c == cols - 1) { //if it is the last member of a row
-				ofs << intensity; //we save the hit ros value
-			}
-			else {
-				ofs << intensity << this->delimeter;
-			}
-		}
-		ofs << "\n";
-	}
-	// Close file 
-	ofs.close();
-}
-
-
-void CSVWriter::printCrownAscii(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<float> crownMetrics, std::vector<int> statusCells)
-{
-	bool outs = false;
-	std::ofstream ofs(this->fileName, std::ofstream::out);
-	// Adding vector to CSV File
-	int r, c;
-	// Add header to ascii file
-		//first line: coles
-	ofs << "ncols";
-	ofs << this->delimeter;
-	ofs << cols;
-	ofs << "\n";
-	//second line: rows
-	ofs << "nrows";
-	ofs << this->delimeter;
-	ofs << rows;
-	ofs << "\n";
-	//third line: xllcorner
-	ofs << "xllcorner";
-	ofs << this->delimeter;
-	ofs << xllcorner;
-	ofs << "\n";
-	//fourth line: yllcorner
-	ofs << "yllcorner";
-	ofs << this->delimeter;
-	ofs << yllcorner;
-	ofs << "\n";
-	//cellsize
-	ofs << "cellsize";
-	ofs << this->delimeter;
-	ofs << cellside;
-	ofs << "\n";
-	//NODATA_value
-	ofs << "NODATA_value";
-	ofs << this->delimeter;
-	ofs << -9999;
-	ofs << "\n";
-	this->linesCount++;
-	bool crown;
-	double max_ros;
-	for (int r = 0; r < rows; r++)
-	{
-		for (int c = 0; c < cols; c++)
-		{
-			crown = 0; //default hit ros
-			max_ros = 0;
-			bool origin = false;
-			bool destiny = false;
-			int destiny_it;
-			if (statusCells[c + r * cols] == 1) {//if the cell is burnt or burning
-				for (int it = 0; it <= crownMetrics.size(); it = it + 9) {//we iterate over the message file
-					if (crownMetrics[it] == (c + r * cols + 1)) { //if the destiny node of messages is the selected cell 
-						if ((crownMetrics[it + 2]) > max_ros) {//if the time of hitting is the lower
-							max_ros = crownMetrics[it + 2];//we update hit time
-							crown = crownMetrics[it + 5];//we update the hit ros
-						}
-						origin = true;
-					}
-					if (crownMetrics[it + 1] == (c + r * cols + 1)) {
-						destiny = true;
-						destiny_it = it;
-					}
-				}
-				if ((destiny) && (!origin)) {
-					crown = crownMetrics[destiny_it + 6];
-				}
-			}
-			if (c == cols - 1) { //if it is the last member of a row
-				ofs << crown; //we save the hit ros value
-			}
-			else {
-				ofs << crown << this->delimeter;
-			}
-		}
-		ofs << "\n";
-	}
-	// Close file 
-	ofs.close();
-}
-
-
-void CSVWriter::printCfb(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<float> crownMetrics, std::vector<int> statusCells)
-{
-	bool outs = false;
-	std::ofstream ofs(this->fileName, std::ofstream::out);
-	// Adding vector to CSV File
-	int r, c;
-	// Add header to ascii file
-		//first line: coles
-	ofs << "ncols";
-	ofs << this->delimeter;
-	ofs << cols;
-	ofs << "\n";
-	//second line: rows
-	ofs << "nrows";
-	ofs << this->delimeter;
-	ofs << rows;
-	ofs << "\n";
-	//third line: xllcorner
-	ofs << "xllcorner";
-	ofs << this->delimeter;
-	ofs << xllcorner;
-	ofs << "\n";
-	//fourth line: yllcorner
-	ofs << "yllcorner";
-	ofs << this->delimeter;
-	ofs << yllcorner;
-	ofs << "\n";
-	//cellsize
-	ofs << "cellsize";
-	ofs << this->delimeter;
-	ofs << cellside;
-	ofs << "\n";
-	//NODATA_value
-	ofs << "NODATA_value";
-	ofs << this->delimeter;
-	ofs << -9999;
-	ofs << "\n";
-	this->linesCount++;
-	float crown;
-	double max_ros;
-	for (int r = 0; r < rows; r++)
-	{
-		for (int c = 0; c < cols; c++)
-		{
-			crown = 0; //default hit ros
-			max_ros = 0;
-			bool origin = false;
-			bool destiny = false;
-			int destiny_it;
-			if (statusCells[c + r * cols] == 1) {//if the cell is burnt or burning
-				for (int it = 0; it <= crownMetrics.size(); it = it + 9) {//we iterate over the message file
-					if (crownMetrics[it] == (c + r * cols + 1)) { //if the destiny node of messages is the selected cell 
-						if (true) {//if the time of hitting is the lower
-							max_ros = crownMetrics[it + 2];//we update hit time
-							crown = crownMetrics[it + 7];//we update the hit ros
-
-						}
-						origin = true;
-					}
-					if (crownMetrics[it + 1] == (c + r * cols + 1)) {
-						destiny = true;
-						destiny_it = it;
-					}
-				}
-				if ((destiny) && (!origin)) {
-					crown = crownMetrics[destiny_it + 8];
-				}
-			}
-
-			if (c == cols - 1) { //if it is the last member of a row
-				ofs << crown; //we save the hit ros value
-			}
-			else {
-				ofs << crown << this->delimeter;
-			}
-		}
-		ofs << "\n";
-	}
-	// Close file 
-	ofs.close();
 }
 
 

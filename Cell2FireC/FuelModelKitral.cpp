@@ -735,7 +735,7 @@ float active_rate_of_spreadFM10(inputs* data, main_outs *at) //En KITRAL SE USA 
     p3 = 13.8;
 
     ch = (-2.97374 + 0.262 * rh - 0.00982 * tmp);
-    fmc = 0.002712 * 60; //factor de propagacion en m/min
+    fmc = 0.002712 * 60; //factor de propagacion en m/min de PL04
     fch = (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0)); //es -14.3 segun el libro
     fv = p1 * exp(-p2 * ws * 0.4) + p3;
     //fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);

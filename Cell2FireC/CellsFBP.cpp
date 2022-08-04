@@ -309,7 +309,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
                                                           inputs df_ptr[], fuel_coefs * coef, 
 														  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 														  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float>* crownMetrics,
-														  bool & activeCrown,double randomROS,int perimeterCells) 
+														  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads) 
 	{
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -331,7 +331,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 	df_ptr[this->realId-1].cros = args->AllowCROS;
 	df_ptr[this->realId-1].FMC = args->FMC;
 	df_ptr[this->realId-1].verbose = args->verbose;
-	
+	df_ptr[this->realId-1].verbose = args->verbose;
 	int head_cell=angleToNb[wdf_ptr->waz];//head cell for slope calculation
 
 	//df_ptr[this->realId-1].waz
@@ -487,15 +487,14 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				FSCell->push_back(double(period));
 				FSCell->push_back(std::ceil(ros * 100.0) / 100.0); //o headstruct.ros
 				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
-				crownMetrics->push_back(double(this->realId));
-				crownMetrics->push_back(double(nb));
-				crownMetrics->push_back(double(std::ceil(ros * 100.0) / 100.0)); //o headstruct.ros
-				crownMetrics->push_back(mainstruct.byram);
-				crownMetrics->push_back(metrics.byram);
-				crownMetrics->push_back(mainstruct.crown);
-				crownMetrics->push_back(metrics.crown);
-				crownMetrics->push_back(mainstruct.cfb);
-				crownMetrics->push_back(metrics.cfb);
+				crownState[this->realId]=mainstruct.crown;
+				crownState[nb]=metrics.crown;
+				RateOfSpreads[this->realId]=double(std::ceil(ros * 100.0) / 100.0);
+				RateOfSpreads[nb]=double(std::ceil(ros * 100.0) / 100.0);
+				Intensities[this->realId]=mainstruct.byram;
+				Intensities[nb]=metrics.byram;
+				crownFraction[this->realId]=mainstruct.cfb;
+				crownFraction[nb]=metrics.cfb;
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);
@@ -555,7 +554,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 																  inputs * df_ptr, fuel_coefs * coef, 
 																  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 																  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float>* crownMetrics,
-																  bool & activeCrown, double randomROS, std::vector<float> & EllipseFactors,int perimeterCells) 
+																  bool & activeCrown, double randomROS, std::vector<float> & EllipseFactors,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads) 
 	{
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -713,13 +712,14 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 				FSCell->push_back(double(period));
 				FSCell->push_back(ros);
 				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
-				crownMetrics->push_back(double(this->realId));
-				crownMetrics->push_back(double(nb));
-				crownMetrics->push_back(double(ros));
-				crownMetrics->push_back(mainstruct.byram);
-				crownMetrics->push_back(metrics.byram);
-				crownMetrics->push_back(mainstruct.crown);
-				crownMetrics->push_back(metrics.crown);
+				crownState[this->realId]=mainstruct.crown;
+				crownState[nb]=metrics.crown;
+				RateOfSpreads[this->realId]=double(std::ceil(ros * 100.0) / 100.0);
+				RateOfSpreads[nb]=double(std::ceil(ros * 100.0) / 100.0);
+				Intensities[this->realId]=mainstruct.byram;
+				Intensities[nb]=metrics.byram;
+				crownFraction[this->realId]=mainstruct.cfb;
+				crownFraction[nb]=metrics.cfb;
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);

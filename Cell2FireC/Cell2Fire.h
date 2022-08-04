@@ -89,6 +89,11 @@ class Cell2Fire {
 		 vector<int> burnedOutList;
 		 std::vector<double> FSCell;
 		 std::vector<float> crownMetrics;
+		 std::vector<int>crownState;
+		 std::vector<float>Intensities;
+		 std::vector<float>crownFraction;
+		 std::vector<float>RateOfSpreads;
+
 
 		 //std::vector<unordered_set<int>> IgnitionSets;
 		 std::vector<std::vector<int>> IgnitionSets;
