@@ -27,4 +27,4 @@ Installation may require some familiarity with C++, make, and Python.
 - rasterio
 - networkx (for stats module)
 
-# Ilustrative examples
+# Illustrative examples
