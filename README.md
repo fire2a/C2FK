@@ -9,7 +9,7 @@ Wildfire spatial simulation has proven to be a useful tool for fire management, 
 
 # Installation
 Installation may require some familiarity with C++, make, and Python.
-* cd Cell2FireSB/Cell2FireC
+* cd C2FK/Cell2FireC
 * (edit Makefile to have the correct path to Eigen)
 * make
 * cd .. 
