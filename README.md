@@ -28,3 +28,4 @@ Installation may require some familiarity with C++, make, and Python.
 - networkx (for stats module)
 
 # Illustrative examples
+A tutorial can be found at [C2F+S&B Tutorial](https://github.com/fire2a/C2FSB/blob/main/C2FS%26B_Tutorial.pdf)
