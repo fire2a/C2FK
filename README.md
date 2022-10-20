@@ -33,5 +33,3 @@ A tutorial can be found at [C2F+K Tutorial](https://docs.google.com/presentation
 # Output examples
 ## Fire simulation in El Portillo, with crown fire behavior.  
 ![Example-El Portillo-Crown fire](Output/El_portillo.png)
-## Risck metrics: Burn Probability (BP), Betweenness Centrality (BC), Downstream Protection Value (DPV), and Growth Propagation Tree (GPT).
-![Example-Risck_Metrics](Output/example-metrics.png)
