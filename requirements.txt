@@ -2,9 +2,8 @@ numpy
 pandas
 matplotlib
 seaborn
-pprint
 imread
 tqdm
 nlopt
-opencv
+python3-opencv
 deap
