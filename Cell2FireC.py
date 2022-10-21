@@ -183,7 +183,7 @@ class Cell2FireC:
     '''
     def getData(self):
         # Paths
-        ForestFile = os.path.join(self.args.InFolder, "Forest.asc")
+        ForestFile = os.path.join(self.args.InFolder, "fuels.asc")
         FBPlookup = os.path.join(self.args.InFolder, "kitral_lookup_table.csv")
         
         # Obtain FBP and Color dictionaries from FBP file, read the ForestGrid file
@@ -261,7 +261,7 @@ class Cell2FireC:
     '''
     def stats(self):
         # Get rows, cols 
-        DFForest = pd.read_csv(os.path.join(self.args.InFolder, "Forest.asc"), 
+        DFForest = pd.read_csv(os.path.join(self.args.InFolder, "fuels.asc"), 
                                sep=" ", header=None, nrows=2)
         Shape = DFForest[1].values
         
