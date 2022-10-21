@@ -5,5 +5,5 @@ seaborn
 imread
 tqdm
 nlopt
-python3-opencv
+opencv-python
 deap
