@@ -7,3 +7,4 @@ tqdm
 nlopt
 opencv-python
 deap
+rasterio
