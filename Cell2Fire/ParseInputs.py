@@ -55,7 +55,7 @@ def ParseInputs():
                         help="Number of threads to run the simulation",
                         dest="nthreads",
                         type=int,
-                        default=2)
+                        default=1)
     parser.add_argument("--max-fire-periods",
                         help="Maximum fire periods per year (default 1000)",
                         dest="max_fire_periods",
