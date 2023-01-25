@@ -385,4 +385,48 @@ filename        str
 def CellsInfo(filename, NCells):
     return np.asarray([1 for i in range(NCells)]), 0.
 
+# Reads an ASCII file with any interesting data
+def Ascii2list(path, NCells):
+    output =  np.full(NCells, np.nan)
+    ff = path
+    if os.path.isfile(ff) == True:
+        aux = 0
+        with open(ff, "r") as f:
+            filelines = f.readlines()
+
+            line = filelines[4].replace("\n","")
+            parts = line.split()
+
+            if parts[0] != "cellsize":
+                print ("line=",line)
+                raise RuntimeError('Expected cellsize on line 5 of'+ ff)
+
+            row = 1
+
+            # Read the ASCII file with the grid structure
+            for row in range(6, len(filelines)):
+                try:
+                    line = filelines[row]
+                    line = line.replace("\n","")
+                    line = ' '.join(line.split())
+                    line = line.split(" ")
+                    #print(line)
+                    for c in line:
+                        output[aux] = float(c)
+                        aux += 1
+                except ValueError:
+                    line = filelines[row]
+                    line = line.replace("\n","")
+                    line = ' '.join(line.split())
+                    line = line.split(", ")
+                    #print(line)
+                    for c in line:
+                        output[aux] = float(c)
+                        aux += 1
+
+    else:
+        print("   No", path, "file, filling with NaN")
+            
+    return output
+
 
