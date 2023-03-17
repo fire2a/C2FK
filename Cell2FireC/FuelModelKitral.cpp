@@ -641,35 +641,32 @@ float slope_effect(float elev_i, float elev_j, int cellsize)
   }
 
 
-float flame_length(inputs *data, fuel_coefs *ptr) //REVISAR ESTA ECUACI�N
+float flame_length(inputs *data, main_outs *at) //REVISAR ESTA ECUACI�N
    {
-       float q1, q2, q3, fl, ws ;
+       float ib, fl ;
 
-       ws = data->ws ;
-       q1 = 2 ;
-       q2 = 2 ;
-       q3 = 2 ; 
+       ib = at->byram ;
 
-       fl = pow(q1 * exp(-q2 * ws) + q3, 2) ;
+       fl = 0.0775*pow(ib, 0.46) ;
        return fl; 
    }
 
-float angleFL(inputs *data, fuel_coefs *ptr)
+float angleFL(inputs *data, main_outs *at)
    {
        float angle, fl, y, ws ;
        ws = data->ws ;
-       fl = flame_length(data, ptr) ;
+       fl = at->fl;
        y = 10.0 / 36.0 * ws ;
 
        angle = atan(2.24 * sqrt(fl / pow(y, 2)))  ;
        return angle;
    }
 
-float flame_height(inputs *data, fuel_coefs *ptr)
+float flame_height(inputs *data,  main_outs *at)
   {
       float fh, phi ;
-      phi = angleFL(data, ptr) ;
-      fh = flame_length(data, ptr) * sin(phi) ;
+      phi = angleFL(data, at) ;
+      fh = at->fl * sin(phi) ;
       return fh ;
   }
 
@@ -834,18 +831,20 @@ float backfire_ros10(fire_struc *hptr, snd_outs *sec)
     at->b = (hptr->rss + bptr->rss) / (2. * sec->lb) ; 
     at->c = (hptr->rss - bptr->rss) / 2. ; 
     
-    // Step 6: Flame Length
-    at->fl = flame_length(data, ptr);
-    
-    // Step 7: Flame angle
-    at->angle = angleFL(data, ptr) ;
-    
-	// Step 8: Flame Height
-    at->fh = flame_height(data, ptr) ;
-
-    // Step 9: Byram Intensity
+    // Step 6: Byram Intensity
     at->byram = byram_intensity(data,at);
     
+
+    // Step 7: Flame Length
+    at->fl = flame_length(data, at);
+    
+    // Step 8: Flame angle
+    at->angle = angleFL(data, at) ;
+    
+	// Step 9: Flame Height
+    at->fh = flame_height(data, at) ;
+
+
 	// Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
     if (data->cros && cbhs[data->nftype][0]!=0) {
         if (activeCrown){ //si el fuego esta activo en copas chequeamos condiciones
@@ -973,7 +972,7 @@ void determine_destiny_metrics(inputs* data, fuel_coefs* ptr, main_outs* metrics
     //ptr->q3 = q_coeff[data->nftype][2];
     ptr->nftype = data->nftype;
     // Step 6: Flame Length
-    metrics->fl = flame_length(data, ptr);
+    metrics->fl = flame_length(data, metrics);
     // Step 9: Byram Intensity
     metrics->byram = byram_intensity(data,metrics);
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
