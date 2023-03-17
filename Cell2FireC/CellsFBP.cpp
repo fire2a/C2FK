@@ -281,7 +281,7 @@ double CellsFBP::allocate(double offset, double base, double ros1, double ros2) 
 
 float CellsFBP::slope_effect(float elev_i, float elev_j, int cellsize)
   {
-	float ps_ij = (elev_j - elev_i) / (cellsize/4.);
+	float ps_ij = (elev_j - elev_i) / cellsize;
     float se;
     se = 1. + 0.023322 * ps_ij + 0.00013585 * std::pow(ps_ij, 2) ;
     
@@ -309,7 +309,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
                                                           inputs df_ptr[], fuel_coefs * coef, 
 														  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 														  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float>* crownMetrics,
-														  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads) 
+														  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths) 
 	{
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -495,6 +495,8 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				Intensities[nb]=metrics.byram;
 				crownFraction[this->realId]=mainstruct.cfb;
 				crownFraction[nb]=metrics.cfb;
+		    	FlameLengths[this->realId]=mainstruct.fl;
+			    FlameLengths[nb]=metrics.fl;
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);
@@ -554,7 +556,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 																  inputs * df_ptr, fuel_coefs * coef, 
 																  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 																  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float>* crownMetrics,
-																  bool & activeCrown, double randomROS, std::vector<float> & EllipseFactors,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads) 
+																  bool & activeCrown, double randomROS, std::vector<float> & EllipseFactors,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads, std::vector<float> & FlameLengths) 
 	{
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -679,7 +681,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 					  flankstruct.ros * EllipseFactors[1], 
 					  backstruct.ros * EllipseFactors[2],
 					  EllipseFactors[3]);
-		*/				
+		*/		  
 		
 		ros_distr(cartesianAngle,  
  					 mainstruct.a * EllipseFactors[0],
@@ -720,7 +722,8 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 				Intensities[nb]=metrics.byram;
 				crownFraction[this->realId]=mainstruct.cfb;
 				crownFraction[nb]=metrics.cfb;
-
+		    	FlameLengths[this->realId]=mainstruct.fl;
+			    FlameLengths[nb]=metrics.fl;
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);
                 /*if (verbose) {

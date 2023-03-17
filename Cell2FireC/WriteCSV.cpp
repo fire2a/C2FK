@@ -248,6 +248,28 @@ void CSVWriter::printWeather(std::vector<std::string> weatherHistory)
 	ofs.close();
 }
 
+void CSVWriter::printCSV_V2(int rows, int cols, std::vector<int> statusCells)
+{
+	std::ofstream ofs(this->fileName, std::ofstream::out);
+	std::string toOut;
+	int r,c,i;
+	
+	for (r = 0; r < rows; r++)
+	{
+		for (c = 0; c < cols; c++)
+		{
+			std::string toOut;
+			for (i = 0; i < cols; i ++){
+					toOut += std::to_string(statusCells[c+r*cols + i])  + this->delimeter;
+			}
+			ofs << toOut << "\n";
+			c+=cols;
+		}
+	}
+	// Close file 
+	ofs.close();
+}
+
 
 
 void CSVWriter::MakeDir(std::string pathPlot) {

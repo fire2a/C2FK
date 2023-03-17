@@ -190,7 +190,8 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
-	
+	this->FlameLengths = std::vector<float> (this->nCells, 0);
+
 	this->ignProb = std::vector<float>(this->nCells, 1);
 	CSVParser.parsePROB(this->ignProb, DF, this->nCells);
 
@@ -416,7 +417,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->year = 1;
 	this->weatherPeriod = 0;
 	this->noIgnition = true;  		//  None = -1
-	this->activeCrown= false;
+	this->activeCrown=false;
 	this->gridNumber = 0;
 	this->fire_period = vector<int>(this->args.TotalYears, 0);
 	
@@ -470,9 +471,9 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->year = 1;
 	this->weatherPeriod = 0;
 	this->noIgnition = true;  		//  None = -1
-	this->activeCrown=false;
 	this->nIgnitions = 0;
 	this->gridNumber = 0;
+	this->activeCrown=false;
 	this->done = false;
 	this->fire_period = vector<int>(this->args.TotalYears, 0);
 	this->sim = simExt;
@@ -494,34 +495,40 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->messagesFolder = this->args.OutFolder + "/Messages/";
 	}
 	//ROS Folder
-	if (this->args.OutFireBehavior) {
+	if (this->args.OutRos) {
 		CSVWriter CSVFolder("", "");
 		this->messagesFolder = "mkdir -p " + this->args.OutFolder + "/RateOfSpread/";
 		CSVFolder.MakeDir(this->messagesFolder);
 		this->messagesFolder = this->args.OutFolder + "/RateOfSpread/";
 	}
 	//Byram Intensity Folder
-	if (this->args.OutFireBehavior) {
+	if (this->args.OutIntensity) {
 		CSVWriter CSVFolder("", "");
 		this->messagesFolder = "mkdir -p " + this->args.OutFolder + "/Intensity/";
 		CSVFolder.MakeDir(this->messagesFolder);
 		this->messagesFolder = this->args.OutFolder + "/Intensity/";
 	}
+	//Flame Length Folder
+	if (this->args.OutFl) {
+		CSVWriter CSVFolder("", "");
+		this->messagesFolder = "mkdir -p " + this->args.OutFolder + "/FlameLength/";
+		CSVFolder.MakeDir(this->messagesFolder);
+		this->messagesFolder = this->args.OutFolder + "/FlameLength/";
+	}
 	//Crown Folder
-	if (this->args.OutFireBehavior && this->args.AllowCROS) {
+	if (this->args.OutCrown && this->args.AllowCROS) {
 		CSVWriter CSVFolder("", "");
 		this->messagesFolder = "mkdir -p " + this->args.OutFolder + "/CrownFire/";
 		CSVFolder.MakeDir(this->messagesFolder);
 		this->messagesFolder = this->args.OutFolder + "/CrownFire/";
 	}
-	//Crown Fraction Burn Folder
-	if (this->args.OutFireBehavior && this->args.AllowCROS) {
+		//Crown Fraction Burn Folder
+	if (this->args.OutCrownConsumption && this->args.AllowCROS) {
 		CSVWriter CSVFolder("", "");
 		this->messagesFolder = "mkdir -p " + this->args.OutFolder + "/CrownFractionBurn/";
 		CSVFolder.MakeDir(this->messagesFolder);
 		this->messagesFolder = this->args.OutFolder + "/CrownFractionBurn/";
 	}
-		
 		
 	// Random Weather 
 	/*std::cout << "Weather Option:" << this->args.WeatherOpt << std::endl;
@@ -671,7 +678,8 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
-	
+	this->FlameLengths = std::vector<float> (this->nCells, 0);
+
 	this->FSCell.clear();
 	this->crownMetrics.clear();//intensity and crown
 	
@@ -745,8 +753,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			microloops = 0;
 			while (true) {
 				selected = distribution(generator2);
-				float rd_number = (float)rand() / ((float)(RAND_MAX/0.999999999));
-				//float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999));
+				float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
 				//DEBUGstd::cout << "selectedPoint: " << selected << std::endl;
 				//DEBUGstd::cout << "selectedProbability: " << ignProb[selected-1] << std::endl;
 				//DEBUGstd::cout << "randomNumber: " << rd_number << std::endl;
@@ -763,7 +770,6 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				}
 
 			}
-			
 			// Check information (Debugging)
 			if (this->args.verbose){
 				std::cout << "aux: " << aux << std::endl;
@@ -779,7 +785,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				if (it->second.getStatus() == "Available" && it->second.fType != 0) {
 					std::cout << "\nSelected (Random) ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< aux;
 					std::vector<int> ignPts = {aux};
-					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown,this->perimeterCells)) {
+					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown)) {
 															
 						//Printing info about ignitions        
 						if (this->args.verbose){
@@ -820,7 +826,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size()-1);
             temp = this->IgnitionSets[this->year - 1][udistribution(generator)];          
 		}
-		
+
 		std::cout << "\nSelected ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< temp;
 	
 		// If cell is available 
@@ -979,12 +985,11 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 				Manage Fire method main step
 		*/
 		if (it->second.ROSAngleDir.size() > 0) {
-			//std::cout << "Previo active Crown"<< this->activeCrown << std::endl;
 			//std::cout << "Entra a Manage Fire" << std::endl;
 			if (!this->args.BBOTuning){  //&df[cell-1] replaced by full df for getting the slopes
 				aux_list = it->second.manageFire(this->fire_period[this->year-1], this->availCells,  df, this->coef_ptr, 
 															   this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
-															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction, this->Intensities, this->RateOfSpreads);
+															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
 			
 			}
 
@@ -994,12 +999,9 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 				auto factors = BBOFactors.find(NFTypesCells[cell-1]);
 				aux_list = it->second.manageFireBBO(this->fire_period[this->year-1], this->availCells,  & df[cell-1], this->coef_ptr, 
 																		this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
-																		&this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV, factors->second,this->perimeterCells,this->crownState, this->crownFraction, this->Intensities, this->RateOfSpreads);
+																		&this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV, factors->second,this->perimeterCells,this->crownState, this->crownFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
 			}
-			//std::cout << "Post active Crown: "<< this->activeCrown << std::endl;									
-			//std::cout << "Sale de Manage Fire"<<crownState[100] << std::endl;
-			
-
+			//std::cout << "Sale de Manage Fire" << std::endl;
 		} 
 
 		else{
@@ -1297,29 +1299,9 @@ void Cell2Fire::Results(){
 			this->gridFolder = this->args.OutFolder + "/Grids/Grids" + std::to_string(this->sim) + "/";
 		//std::string gridName = this->gridFolder + "FinalStatus_" + std::to_string(this->sim) + ".csv";
 		outputGrid();
-		
-		/*if(this->args.verbose){
-			std::cout  << "We are plotting the final forest status to a csv file " << gridName << std::endl;
-		}
-		CSVWriter CSVPloter(gridName, ",");
-		
-		for (auto & cell: this->Cells_Obj){
-			if(cell.second.getStatus() == "Burning" || cell.second.getStatus() == "Burnt"){
-				this->statusCells[cell.second.id] = 1;
-				//std::cout  << "We are including cell " << cell.second.realId << " in the plot" << std::endl;
-			}
-		}
-		
-		
-		std::vector<int> statusCellsCSV (this->nCells);
-		for (i=0; i < this->statusCells.size(); i++){		
-			if(this->statusCells[i] == 1) statusCellsCSV[i] = 1;
-		}
-		CSVPloter.printCSV(this->rows, this->cols, statusCellsCSV);
-		*/
 	}
 	
-
+	
 	// Messages
 	if(this->args.OutMessages){
 		this->messagesFolder = this->args.OutFolder + "/Messages/";
@@ -1342,7 +1324,7 @@ void Cell2Fire::Results(){
 
 
 	// RateOfSpread
-	if (this->args.OutFireBehavior) {
+	if (this->args.OutRos) {
 		this->rosFolder = this->args.OutFolder + "/RateOfSpread/";
 		std::string rosName;
 		if (this->sim < 10) {
@@ -1361,7 +1343,7 @@ void Cell2Fire::Results(){
 	}
 
 	// Intensity
-	if (this->args.OutFireBehavior) {
+	if (this->args.OutIntensity) {
 		this->rosFolder = this->args.OutFolder + "/Intensity/";
 		std::string rosName;
 		if (this->sim < 10) {
@@ -1379,28 +1361,28 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->Intensities);
 	}
 
-
-	// Crown
-	if ((this->args.OutFireBehavior) && (this->args.AllowCROS)) {
-		this->rosFolder = this->args.OutFolder + "/CrownFire/";
+		// Intensity
+	if (this->args.OutFl) {
+		this->rosFolder = this->args.OutFolder + "/FlameLength/";
 		std::string rosName;
 		if (this->sim < 10) {
-			rosName = this->rosFolder + "Crown0" + std::to_string(this->sim) + ".asc";
+			rosName = this->rosFolder + "FL0" + std::to_string(this->sim) + ".asc";
 		}
+
 		else {
-			rosName = this->rosFolder + "Crown" + std::to_string(this->sim) + ".asc";
+			rosName = this->rosFolder + "FL" + std::to_string(this->sim) + ".asc";
 		}
+
 		if (this->args.verbose) {
-			std::cout << "We are generating the Crown behavior to a asc file " << rosName << std::endl;
+			std::cout << "We are generating the Flame Lenght to a asc file " << rosName << std::endl;
 		}
 		CSVWriter CSVPloter(rosName, " ");
-		//CSVPloter.printCrownAscii(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownMetrics, statusCells2); /OLD VERSION
-		CSVPloter.printASCIIInt(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
-
+		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->FlameLengths);
 	}
 
-		// Crown
-	if ((this->args.OutFireBehavior) && (this->args.AllowCROS)) {
+	
+		// Intensity
+	if ((this->args.OutCrownConsumption) && (this->args.AllowCROS)) {
 		this->rosFolder = this->args.OutFolder + "/CrownFractionBurn/";
 		std::string rosName;
 		if (this->sim < 10) {
@@ -1418,8 +1400,25 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
 	}
 
-	
 
+	// Crown
+	if ((this->args.OutCrown) && (this->args.AllowCROS)) {
+		this->rosFolder = this->args.OutFolder + "/CrownFire/";
+		std::string rosName;
+		if (this->sim < 10) {
+			rosName = this->rosFolder + "Crown0" + std::to_string(this->sim) + ".asc";
+		}
+		else {
+			rosName = this->rosFolder + "Crown" + std::to_string(this->sim) + ".asc";
+		}
+		if (this->args.verbose) {
+			std::cout << "We are generating the Crown behavior to a asc file " << rosName << std::endl;
+		}
+		CSVWriter CSVPloter(rosName, " ");
+		//CSVPloter.printCrownAscii(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownMetrics, statusCells2); /OLD VERSION
+		CSVPloter.printASCIIInt(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
+
+	}	
 	
 }
 
@@ -1530,7 +1529,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	if (this->fire_period[this->year - 1] == 0 && !this->done && !this->noMessages){
 		//std::cout << "Entra a Ignition step 0" << std::endl;
 		// Continue only if ignition  - No ignition (True): done
-		if(this->RunIgnition(generator,ep)){
+		if(this->RunIgnition(generator, ep)){
 			// Next year
 			this->weatherPeriod = 0;
 			
@@ -1592,18 +1591,18 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	if (this->year > this->args.TotalYears){
 		//printf("\n\nEntra a year mayor al total...\n\n");
 		// Print-out results to folder
-
 		this->Results();
+
 		// Next Sim if max year
 		this->sim += 1;
 		this->done = true;
 	}
 	
 	// Done flag (extra condition: no available cells or death of the team)
-	if ((this->availCells.size() == 0) || (this->burningCells.size() == 0 && !this->noMessages) && !this->done && !auxC){ // ------------------------Pais
+	if ((this->availCells.size() == 0) || (this->burningCells.size() == 0 && !this->noMessages) && !this->done && !auxC){
 		// Done
 		this->done = true;
-
+		
 		// Print-out results to folder
 		this->Results();        
 		
@@ -1667,12 +1666,28 @@ std::vector<float> Cell2Fire::getFireProgressMatrix(){
 																Main Program	
 
 *******************************************************************************/
-int main(int argc, char * argv[]){
+int main(int argc, char* argv[]) {
 	// Read Arguments
 	std::cout << "------ Command line values ------\n";
 	arguments args;
-	arguments * args_ptr = &args;
+	arguments* args_ptr = &args;
 	parseArgs(argc, argv, args_ptr);
+	//printArgs(args);
+
+	// Random generator and distributions
+	//std::default_random_engine generator (args.seed);
+	//std::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);		// Get random weather
+	//std::normal_distribution<double> ndistribution(0.0,1.0);  							// ROSRV
+
+	// Random numbers (weather file and ROS-CV)
+	//int rnumber;
+	//double rnumber2;
+
+	// Initialize Instance
+	//Cell2Fire Forest(args);
+
+	// Random ignition 
+	//std::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);		// Get random ignition point
 
 	// Episodes
 	int ep = 0;
@@ -1700,13 +1715,14 @@ int main(int argc, char * argv[]){
 		TID = omp_get_thread_num();
 		if (TID == 0 && omp_get_num_threads() < 2) {
 			cout << "There are " << omp_get_num_threads() << " threads" << endl;
-			}
+		}
 		else {
 			cout << "Serial version execution" << endl;
 		}
 		Cell2Fire Forest = Forests[TID];
 		// Random seed
-		std::default_random_engine& generator = generators[TID];
+		// std::default_random_engine generator( args.seed * (TID + 1) );
+		std::default_random_engine& generator = generators[TID]; //generators[args.nthreads]
 
 		// Random generator and distributions
 		std::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);		// Get random weather
@@ -1727,35 +1743,35 @@ int main(int argc, char * argv[]){
 
 		// #pragma omp parallel for 
 		#pragma omp for
-		for(ep = 1; ep <= args.TotalSims; ep++){
+		for (ep = 1; ep <= args.TotalSims; ep++) {
 			TID = omp_get_thread_num();
-		// Reset environment (passing new random numbers)
-			generator = generators[TID];
+			// Reset environment (passing new random numbers)
+			generator = generators[TID]; //generators[args.nthreads]
 			rnumber = udistribution(generator);
 			rnumber2 = ndistribution(generator);
 
-
-		// Reset
+			// Reset
 			Forest.reset(rnumber, rnumber2, ep);
-	
-		// Time steps during horizon (or until we break it)
-		for (tstep = 0; tstep <= Forest.args.MaxFirePeriods * Forest.args.TotalYears ; tstep++){   
-			//DEBUGprintf("\n ---- tstep %d \n", tstep);
-			Forest.Step(generator,ep);
-			//DEBUGprintf("\nDone: %d", Forest.done);
-			
-			if (Forest.done){
-				//DEBUGprintf("\n Done = True!, break \n");
-				break;
+
+			// Time steps during horizon (or until we break it)
+			for (tstep = 0; tstep <= Forest.args.MaxFirePeriods * Forest.args.TotalYears; tstep++) {
+				//DEBUGprintf("\n ---- tstep %d \n", tstep);
+				Forest.Step(generator, ep);
+				//DEBUGprintf("\nDone: %d", Forest.done);
+
+				if (Forest.done) {
+					//DEBUGprintf("\n Done = True!, break \n");
+					break;
+				}
+
 			}
-		
-		}
-		// Enforces to satisfy the total number of simulations (if no ignition, find another cell until we obtain the TotalSim asked)
-		//if (Forest.sim > args.TotalSims){
-		//	break;
-		//}
-		
+			// Enforces to satisfy the total number of simulations (if no ignition, find another cell until we obtain the TotalSim asked)
+			//if (Forest.sim > args.TotalSims){
+			//	break;
+			//}
+
 		}
 	}
 	return 0;
 }
+
