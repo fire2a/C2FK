@@ -62,11 +62,15 @@ class Cell2FireC:
                    '--grids' if (self.args.grids) else '', '--final-grid' if (self.args.finalGrid) else '',
                    '--Fire-Period-Length', str(self.args.input_PeriodLen),
                    '--output-messages' if (self.args.OutMessages) else '',
-				'--out-behavior' if (self.args.OutBehavior) else '',
+                   '--out-fl' if (self.args.OutFl) else '',
+                   '--out-intensity' if (self.args.OutIntensity) else '',
+                   '--out-ros' if (self.args.OutRos) else '',
+                   '--out-crown' if (self.args.OutCrown) else '',
+                   '--out-cfb' if (self.args.OutCrownConsumption) else '',
                    '--weather', self.args.WeatherOpt,
                    '--nweathers', str(self.args.nweathers),
                    '--ROS-CV', str(self.args.ROS_CV),
-                   '--IgnitionRad', str(self.args.IgRadius), 
+                   '--IgnitionRad', str(self.args.IgRadius),
                    '--seed', str(int(self.args.seed)),
                    '--ROS-Threshold', str(self.args.ROS_Threshold),
                    '--HFI-Threshold', str(self.args.HFI_Threshold),
@@ -85,6 +89,7 @@ class Cell2FireC:
         
        #Geotiffs
         if self.args.Geotiffs:
+            print("Generating input Geotiff...", flush=True)
             InputGeotiff(self.args.InFolder)
 
         # Output log
@@ -96,15 +101,16 @@ class Cell2FireC:
             LogName = os.path.join(self.args.InFolder, "LogFile.txt")   
          
         # Perform the call
+        print("Calling Cell2Fire simulator...", flush=True)
         with open(LogName, 'w') as output:
             proc = subprocess.Popen(execArray, stdout=output)
             proc.communicate()
         proc.wait()
-        
+
         # End of the replications
-        print("End of Cell2FireC execution...")
-        
+        print("End of Cell2Fire Simulator execution...",flush=True)
         if self.args.Geotiffs:
+            print("Generating output Geotiff...", flush=True)
             OutputGeotiff(self.args.InFolder,self.args.OutFolder,self.args.nsims)
     
     # Run C++ Sim with heuristic treatment 
@@ -120,11 +126,15 @@ class Cell2FireC:
                    '--grids' if (self.args.grids) else '', '--final-grid' if (self.args.finalGrid) else '',
                    '--Fire-Period-Length', str(self.args.input_PeriodLen),
                    '--output-messages' if (self.args.OutMessages) else '',
-				'--out-behavior' if (self.args.OutBehavior) else '',
+                   '--out-fl' if (self.args.OutFl) else '',
+                   '--out-intensity' if (self.args.OutIntensity) else '',
+                   '--out-ros' if (self.args.OutRos) else '',
+                   '--out-crown' if (self.args.OutCrown) else '',
+                   '--out-cfb' if (self.args.OutCrownConsumption) else '',
                    '--weather', self.args.WeatherOpt,
                    '--nweathers', str(self.args.nweathers),
                    '--ROS-CV', str(self.args.ROS_CV),
-                   '--IgnitionRad', str(self.args.IgRadius), 
+                   '--IgnitionRad', str(self.args.IgRadius),
                    '--seed', str(int(self.args.seed)),
                    '--ROS-Threshold', str(self.args.ROS_Threshold),
                    '--HFI-Threshold', str(self.args.HFI_Threshold),
@@ -172,7 +182,7 @@ class Cell2FireC:
     def generateDataC(self):
         dataName = os.path.join(self.args.InFolder, "Data.csv")
         if os.path.isfile(dataName) is False:
-            print("Generating Data.csv File...")
+            print("Generating Data.csv File...",flush=True)
             DataGenerator.GenDataFile(self.args.InFolder)
             
             
@@ -281,55 +291,56 @@ class Cell2FireC:
                                   nSims=self.args.nsims,
                                   verbose=self.args.verbose,
                                   GGraph=None,
-                                  tCorrected=False)
+                                  tCorrected=False,
+                                  pdfOutputs=self.args.pdfOutputs)
 
         # Hourly Stats
         if self.args.grids:
-            print("Hourly stats...")
+            print("Hourly stats...",flush=True)
             StatsPrinter.HourlyStats()
 
         # General Stats
-        print("General stats...")
+        print("General stats...",flush=True)
         StatsPrinter.GeneralStats()
-        
+
         # Dummy msg if needed
         self.DummyMsg()
-        
+
         # Get Coordinates and colors
         if self.args.spreadPlots or self.args.plots or self.args.allPlots:
-            print("Reading data...")
+            print("Reading data...",flush=True)
             self.getData()  
-            print("Dummy if needed...")
+            print("Dummy if needed...",flush=True)
             self.DummyMsg()
-        
+
         # Spread plots
         if self.args.spreadPlots or self.args.allPlots:
             # Fire Spread Graphs
-            print("Generating global fire spread evolution...")
+            print("Generating global fire spread evolution...",flush=True)
             totalPlots = 1
-            
+
             # If multiple sims, plots including freq are useful
             if self.args.nsims > 1:
                 totalPlots = 3
             for v in tqdm(range(totalPlots)):
-                StatsPrinter.GlobalFireSpreadEvo(self._CoordCells, 
+                StatsPrinter.GlobalFireSpreadEvo(self._CoordCells,
                                                  onlyGraph=True,
                                                  version=v)
 
             # Fire Spread Graphs (individual)
             if self.args.grids:
-                print("Generating individual Fire Spread plots...")
+                print("Generating individual Fire Spread plots...",flush=True)
                 for n in tqdm(range(1, self.args.nsims + 1)):
-                    StatsPrinter.SimFireSpreadEvo(n, self._CoordCells, 
-                                                  self._Colors, 
+                    StatsPrinter.SimFireSpreadEvo(n, self._CoordCells,
+                                                  self._Colors,
                                                   H=None, version=0,
-                                                  print_graph=True, 
+                                                  print_graph=True,
                                                   analysis_degree=False,
                                                   onlyGraph=True)
                     
             
             # Generate Initial Forest
-            print("Generating initial forest plot...")
+            print("Generating initial forest plot...",flush=True)
             FBPlookup = os.path.join(self.args.InFolder, "kitral_lookup_table.csv")
             if self.args.HCells is not None: 
                 HCarray = np.loadtxt(self.args.HCells, skiprows=1, delimiter=",")[1:].astype(np.int)
@@ -349,15 +360,15 @@ class Cell2FireC:
         if self.args.plots or self.args.allPlots:            
             if self.args.grids:
                 # Plotting
-                print("Generating fire evolution plots...")
+                print("Generating fire evolution plots...",flush=True)
                 StatsPrinter.plotEvo()
                 
                 # Combine them with background
                 if self.args.combine:
-                    print("Combining Fires with background (initial forest)...")
+                    print("Combining Fires with background (initial forest)...",flush=True)
                     StatsPrinter.mergePlot()
 
-            print("Generating detailed individual propagation trees...")
+            print("Generating detailed individual propagation trees...",flush=True)
             for n in tqdm(range(1, self.args.nsims + 1)):
                 for v in range(1,4):
                     StatsPrinter.SimFireSpreadEvoV2(n, self._CoordCells,
@@ -380,7 +391,7 @@ class Cell2FireC:
                                   NCells=self._Cols * self._Rows,
                                   boxPlot=True,
                                   CSVs=True,
-                                  statsGeneral=True, 
+                                  statsGeneral=True,
                                   statsHour=True,
                                   histograms=True,
                                   BurntProb=True,
@@ -392,29 +403,29 @@ class Cell2FireC:
 
         # Dummy msg if needed
         self.DummyMsg()
-        
+
         # Hourly Stats
         if self.args.grids:
-            print("Hourly stats...")
+            print("Hourly stats...",flush=True)
             StatsPrinter.HourlyStats()
 
         # General Stats
-        print("General stats...")
+        print("General stats...",flush=True)
         StatsPrinter.GeneralStats()
-        
+
         # Get Coordinates and colors
         if self.args.spreadPlots or self.args.plots or self.args.allPlots:
-            print("Reading data...")
+            print("Reading data...",flush=True)
             self.getData()  
-            print("Dummy if needed...")
+            print("Dummy if needed...",flush=True)
             self.DummyMsg_Heur(OutFolder)
-        
+
         # Spread plots
         if self.args.spreadPlots or self.args.allPlots:
             # Fire Spread Graphs
-            print("Generating global fire spread evolution...")
+            print("Generating global fire spread evolution...",flush=True)
             totalPlots = 1
-            
+
             # If multiple sims, plots including freq are useful
             if self.args.nsims > 1:
                 totalPlots = 3
@@ -425,16 +436,16 @@ class Cell2FireC:
 
             # Fire Spread Graphs (individual)
             if self.args.grids:
-                print("Generating individual Fire Spread plots...")
+                print("Generating individual Fire Spread plots...",flush=True)
                 for n in tqdm(range(1, self.args.nsims + 1)):
-                    StatsPrinter.SimFireSpreadEvo(n, self._CoordCells, 
-                                                  self._Colors, 
+                    StatsPrinter.SimFireSpreadEvo(n, self._CoordCells,
+                                                  self._Colors,
                                                   H=None, version=0,
-                                                  print_graph=True, 
+                                                  print_graph=True,
                                                   analysis_degree=False,
                                                   onlyGraph=True)
-                    
-            
+
+
             # Generate Initial Forest
             print("Generating initial forest plot...")
             FBPlookup = os.path.join(self.args.InFolder, "kitral_lookup_table.csv")
@@ -453,15 +464,15 @@ class Cell2FireC:
         if self.args.plots or self.args.allPlots:            
             if self.args.grids:
                 # Plotting
-                print("Generating fire evolution plots...")
+                print("Generating fire evolution plots...",flush=True)
                 StatsPrinter.plotEvo()
-                
+
                 # Combine them with background
                 if self.args.combine:
-                    print("Combining Fires with background (initial forest)...")
+                    print("Combining Fires with background (initial forest)...",flush=True)
                     StatsPrinter.mergePlot()
 
-            print("Generating detailed individual propagation trees...")
+            print("Generating detailed individual propagation trees...",flush=True)
             for n in tqdm(range(1, self.args.nsims + 1)):
                 for v in range(1,4):
                     StatsPrinter.SimFireSpreadEvoV2(n, self._CoordCells,
@@ -476,10 +487,10 @@ class Cell2FireC:
     def heur(self, AvailCells=set(), BurntCells=set(), HarvestedCells=set()):
         # Seed
         npr.seed(self.args.seed)
-        
+
         # Dummy msg if needed
         self.DummyMsg()
-        
+
         # If no stats, read data
         if self.args.stats is False or \
            (self.args.spreadPlots is False and self.args.plots is False and self.args.allPlots is False):
@@ -501,10 +512,12 @@ class Cell2FireC:
 
         # Folders
         MessagePath = os.path.join(self.args.OutFolder, "Messages")
+        if not os.path.exists(MessagePath):
+            os.makedirs(MessagePath)
         OutFolder = os.path.join(self.args.OutFolder, "Heuristic")
         if not os.path.exists(OutFolder):
             os.makedirs(OutFolder)
-                            
+
         # Heur object
         self._HeurObject = Heuristic(version=self.args.heuristic,       # Heuristic ID
                                      MessagePath=MessagePath,           # Path to the messages (FPV and graphs)
@@ -515,7 +528,7 @@ class Cell2FireC:
                                      HarvestedCells=HarvestedCells,     # Harvested Cells
                                      AdjCells=self._AdjCells,           # Adjacent cells info
                                      NCells=self._NCells,               # Number of cells inside the forest
-                                     Cols=self._Cols,                   # Number of columns inside the forest 
+                                     Cols=self._Cols,                   # Number of columns inside the forest
                                      Rows=self._Rows,                   # Number of rows inside the forest
                                      Year=1,                            # Current year
                                      FPVGrids=self._FPVGrids,           # Boolean flag: Generate FPV grids/Heatmaps
@@ -601,9 +614,10 @@ class Cell2FireC:
             self._CellUtility = np.loadtxt(self.args.valueFile, delimiter=" ", dtype=np.float32)
             self._CellUtility = self._CellUtility.flatten()
         else:
+            print('Reading utility from:'. self.args.valueFile)
             self._CellUtility = np.full(shape=(self._NCells), fill_value=1)        # Cell's utility
-        
-        
+
+
         # Run the heuristic
         SelHeur = AvailHeuristics[self.args.heuristic]
         if self.args.GPTree:
@@ -622,7 +636,7 @@ class Cell2FireC:
                     self.run_Heur(os.path.join(csvPath, "No_Heur_Case"), None)
                 else:
                     print("No evaluation is performed (option)")
-            
+
             else:
                 print("\nTreat Fraction " + str(fr) + "%...")
                 action, fitness = self._HeurObject.runHeur(self._AvailCells.copy(),      # Available cells
@@ -635,8 +649,8 @@ class Cell2FireC:
                 #print("Selected cells:", actions)
                 print("Demand satisfied:", len(action) == DUnits[step])
                 if len(action) != DUnits[step]:
-                    print("Total harvested:", len(action), 
-                          " Demand:", DUnits[step], 
+                    print("Total harvested:", len(action),
+                          " Demand:", DUnits[step],
                           " Delta:", DUnits[step] - len(action))
                 print("Total fitness (FPV):", fitness)
 
@@ -646,15 +660,15 @@ class Cell2FireC:
                     os.makedirs(csvPath)
 
                 # Create the aux DF for saving the harvested cells in different files depending on the treated fraction %
-                np.savetxt(os.path.join(csvPath, SelHeur + "_" +str(fr) + ".csv"), 
-                           np.asarray([1] + actions).reshape(1, len(actions) + 1).astype(np.int), 
+                np.savetxt(os.path.join(csvPath, SelHeur + "_" +str(fr) + ".csv"),
+                           np.asarray([1] + actions).reshape(1, len(actions) + 1).astype(np.int),
                            delimiter=",", fmt="%d", header="Year,HCells", comments='')
                 step += 1
-                
+
                 if self.args.noEvaluation is False:
                     # Run the heuristic
                     print("Running the instance with the heuristic...")
-                    self.run_Heur(os.path.join(csvPath, "Fraction" + str(fr)), 
+                    self.run_Heur(os.path.join(csvPath, "Fraction" + str(fr)),
                                   os.path.join(csvPath, SelHeur + "_" +str(fr) + ".csv"))
 
                     # Stats
@@ -663,3 +677,4 @@ class Cell2FireC:
                                     os.path.join(csvPath, SelHeur + "_" +str(fr) + ".csv"))
                 else:
                     print("No evaluation is performed, TF:", fr)
+
