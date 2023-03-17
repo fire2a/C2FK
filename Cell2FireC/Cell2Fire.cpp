@@ -785,7 +785,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				if (it->second.getStatus() == "Available" && it->second.fType != 0) {
 					std::cout << "\nSelected (Random) ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< aux;
 					std::vector<int> ignPts = {aux};
-					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown)) {
+					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown,this->perimeterCells)) {
 															
 						//Printing info about ignitions        
 						if (this->args.verbose){

@@ -254,25 +254,7 @@ void parseArgs(int argc, char * argv[], arguments * args_ptr)
 		args_ptr->IgnitionRadius = std::stoi (input_igrad ,&sz); 
     } 
 	else args_ptr->IgnitionRadius =  diradius;
-	
 
-	//--fmc
-	char * input_fmc = getCmdOption(argv, argv + argc, "--fmc");
-    if (input_fmc){
-        printf("fmc: %s \n", input_fmc);
-		args_ptr->fmc = std::stoi (input_fmc ,&sz);  
-    }
-	else args_ptr->fmc = dfmc; 
-	
-		//--fmc
-	char * input_scenario = getCmdOption(argv, argv + argc, "--scenario");
-    if (input_scenario){
-        printf("scenario: %s \n", input_scenario);
-		args_ptr->scenario = std::stoi (input_scenario ,&sz);  
-    }
-	else args_ptr->scenario = dscen; 
-	
-	
 	//--ROS-Threshold
 	char * ROS_Threshold = getCmdOption(argv, argv + argc, "--ROS-Threshold");
     if (ROS_Threshold){
