@@ -170,7 +170,7 @@ def ParseInputs():
     
     # Booleans
     parser.add_argument("--weather",
-                        help="The 'type' of weather: constant, random, rows (default rows)",
+                        help="The 'type' of weather: constant, distribution, random, rows (default rows)",
                         dest="WeatherOpt",
                         type=str,
                         default="rows")
@@ -179,8 +179,8 @@ def ParseInputs():
                         dest="spreadPlots",
                         default=False,
                         action='store_true')
-    parser.add_argument("--finalGrid",
-                        help="GGenerate final grid",
+    parser.add_argument("--final-grid",
+                        help="Generate final grid",
                         dest="finalGrid",
                         default=False,
                         action="store_true")
@@ -202,11 +202,6 @@ def ParseInputs():
     parser.add_argument("--simPlots",
                         help="generate simulation/replication plots",
                         dest="plots",
-                        default=False,
-                        action='store_true')
-    parser.add_argument("--out-behavior",
-                        help="Generates ASCII files with hit ROS, Byram Intensity and Boolean for Crown Fire if correspondes",
-                        dest="OutBehavior",
                         default=False,
                         action='store_true')
     parser.add_argument("--allPlots",
@@ -234,6 +229,31 @@ def ParseInputs():
                         dest="OutMessages",
                         default=False,
                         action='store_true')
+    parser.add_argument("--out-fl",
+                        help="Generates ASCII files with Flame Length",
+                        dest="OutFl",
+                        default=False,
+                        action='store_true')
+    parser.add_argument("--out-intensity",
+                        help="Generates ASCII files with Byram Intensity",
+                        dest="OutIntensity",
+                        default=False,
+                        action='store_true')
+    parser.add_argument("--out-ros",
+                        help="Generates ASCII files with hit ROS",
+                        dest="OutRos",
+                        default=False,
+                        action='store_true')
+    parser.add_argument("--out-crown",
+                        help="Generates ASCII files with Boolean for Crown Fire if correspondes",
+                        dest="OutCrown",
+                        default=False,
+                        action='store_true') 
+    parser.add_argument("--out-cfb",
+                        help="Generates ASCII files with Crown Fire Fuel Consumption if correspondes",
+                        dest="OutCrownConsumption",
+                        default=False,
+                        action='store_true')                                                                        
     parser.add_argument("--Prometheus-tuned",
                         help="Activates the predefined tuning parameters based on Prometheus",
                         dest="PromTuning",
@@ -249,14 +269,14 @@ def ParseInputs():
                         dest="stats",
                         default=False,
                         action="store_true")
-    parser.add_argument("--correctedStats",
-                        help="Normalize the number of grids outputs for hourly stats",
-                        dest="tCorrected",
-                        default=False,
-                        action="store_true")
     parser.add_argument("--geotiffs",
                         help="Generate .tif files for georeferencing inputs and outputs",
                         dest="Geotiffs",
+                        default=False,
+                        action="store_true")
+    parser.add_argument("--correctedStats",
+                        help="Normalize the number of grids outputs for hourly stats",
+                        dest="tCorrected",
                         default=False,
                         action="store_true")
     parser.add_argument("--onlyProcessing",
@@ -269,6 +289,11 @@ def ParseInputs():
                         dest="BBO",
                         default=False,
                         action="store_true")
+    parser.add_argument("--cros",
+                        help="Allow Crown Fire",
+                        dest="cros",
+                        default=False,
+                        action="store_true")
     parser.add_argument("--fdemand",
                         help="Finer demand/treatment fraction",
                         dest="fdemand",
@@ -279,20 +304,14 @@ def ParseInputs():
                         dest="pdfOutputs",
                         default=False,
                         action="store_true")
-    parser.add_argument("--cros",
-                        help="Allow Crown Fire",
-                        dest="cros",
-                        default=False,
-                        action="store_true")
-    
     
     
     # Floats
     parser.add_argument("--Fire-Period-Length",
-                        help="Fire Period length in minutes (needed for ROS computations). Default 60",
+                        help="Fire Period length in minutes (needed for ROS computations). Default 1.0",
                         dest="input_PeriodLen",
                         type=float,
-                        default=60)                    
+                        default=1.0)                    
     parser.add_argument("--Weather-Period-Length",
                         help="Weather Period length in minutes (needed weather update). Default 60",
                         dest="weather_period_len",
