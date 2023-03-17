@@ -430,7 +430,7 @@ void CSVReader::parseForestDF(forestDF * frt_ptr, std::vector<std::vector<std::s
 						adjCells.push_back(Aux);
                         n++;    
 					}
-                    if (c>0 and c<cols-1){    
+                    if (c>0 && c<cols-1){    
                         Aux = {{North,n-cols}, {NorthEast, n-cols+1}, {NorthWest,n-cols-1}, {South,-1}, 
 									{SouthEast,-1} , {SouthWest,-1}, {East,n+1}, {West,n-1}};
 						adjCells.push_back(Aux);
@@ -484,7 +484,8 @@ void CSVReader::parseForestDF(forestDF * frt_ptr, std::vector<std::vector<std::s
 	frt_ptr->cols = cols;
 	frt_ptr->coordCells = coordCells;
 	frt_ptr->adjCells = adjCells;
-		
+	frt_ptr->xllcorner = xllcorner;
+	frt_ptr->yllcorner = yllcorner;
 		
 	
 }
