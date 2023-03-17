@@ -971,10 +971,10 @@ void determine_destiny_metrics(inputs* data, fuel_coefs* ptr, main_outs* metrics
     //ptr->q2 = q_coeff[data->nftype][1];
     //ptr->q3 = q_coeff[data->nftype][2];
     ptr->nftype = data->nftype;
-    // Step 6: Flame Length
-    metrics->fl = flame_length(data, metrics);
-    // Step 9: Byram Intensity
+    // Step 6: Byram Intensity
     metrics->byram = byram_intensity(data,metrics);
+    // Step 7: Flame Length
+    metrics->fl = flame_length(data, metrics);
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
     if (data->cros) {
         crownFire = fire_type(data, metrics);
