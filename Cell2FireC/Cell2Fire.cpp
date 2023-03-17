@@ -152,7 +152,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->nCells = rows * cols; 
 	this->cellSide = frdf.cellside;
 	this->areaCells= cellSide * cellSide;
-	this->perimeterCells = 4 * cellSide;
+	this->perimeterCells = 4 * cellSide; //perimeter of the square
 	this->xllcorner = frdf.xllcorner;
 	this->yllcorner = frdf.yllcorner;
 

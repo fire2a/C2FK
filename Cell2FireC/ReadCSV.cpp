@@ -347,7 +347,7 @@ void CSVReader::parseForestDF(forestDF * frt_ptr, std::vector<std::vector<std::s
 	
 	xllcorner = std::stod(DF[2][1], &sz);
 	yllcorner = std::stod(DF[3][1], &sz);
-	cellside = std::stoi(DF[4][1], &sz);
+	cellside = std::stoi(DF[4][1], &sz); //length of a side of the square
 	
 	//DEBUGprintf("cols: %d,  rows:  %d,   cellside:  %d\n", cols, rows, cellside);
 	
