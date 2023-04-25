@@ -1,15 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan 24 12:04:43 2023
-
-@author: Rodrigo Mahaluf Recasens
-"""
 import pyomo.environ as pyo
-import modin.pandas as pd
+import pandas as pd
 import os
 import numpy as np
 from ReadDataPrometheus import Ascii2list
+import time
 
 def open_as_array(rst_fp, nCells): 
     """
@@ -21,6 +15,22 @@ def open_as_array(rst_fp, nCells):
             rs[i] = 0
     return(rs)
 
+def array2ascii(array, filename, xllcorner, yllcorner, cellsize, NODATA_value,nrows=None, ncols=None): 
+    array = array[::-1]
+    if nrows==None or ncols==None:
+      nrows, ncols = array.shape
+    file = open(filename,"w")
+    file.write(f"ncols {ncols}\n"
+               f"nrows {nrows}\n"
+               f"xllcorner     {xllcorner}\n"
+               f"yllcorner     {yllcorner}\n"
+               f"cellsize      {cellsize}\n"
+               f"NODATA_value  {NODATA_value}\n")
+    for r in range(nrows): 
+        line = str(list(array[r])) 
+        line = line.replace("[","")
+        line = line.replace("]","\n")
+        file.write(line)
 
 
 def lst2dct(lst, set_Avail): 
@@ -61,8 +71,8 @@ def bin_to_nod(solution, output_fp="harvested.csv"):
     df = pd.DataFrame(datos, columns=cols)
     df.to_csv(output_fp, index = None, mode = 'a')
 
-def fire_breack_allocator(set_Avail, dpv, bp, var, dtc_coordPos, 
-                          capacity = 0.01, tolerance = 0.1, solver = 'gurobi', 
+def fire_breack_allocator(set_Avail, dpv, bp, var, dtc_coordPos,m,n, 
+                          capacity = 0.03, tolerance = 0.3, solver = 'gurobi', 
                           output_fp = 'harvested'): 
     """
     bp: Burn Probability list or dictionary. 
@@ -79,11 +89,11 @@ def fire_breack_allocator(set_Avail, dpv, bp, var, dtc_coordPos,
     # expected loss of the landscape combined Index
     el = expected_loss(var, bp)
     
-    
     # Upper boundries for each constraint
     tolerance_cons = tolerance*el
     capacity_cons = int(capacity*len(set_Avail))
-    
+    print(len(set_Avail))
+    print(capacity_cons)
     # model inicialization
     model = pyo.ConcreteModel()
     
@@ -123,7 +133,7 @@ def fire_breack_allocator(set_Avail, dpv, bp, var, dtc_coordPos,
         if pyo.value(model.x[i]) > 0:  # celdas con valor 1
             # print 'x[' + str(i) + '] = ', value(model.x[i])
             S.add(i)
-
+    print(len(S))
     lst_firebreaks = []
     for i in range(len(var)): 
         if i+1 in S: 
@@ -133,7 +143,7 @@ def fire_breack_allocator(set_Avail, dpv, bp, var, dtc_coordPos,
     
     # Write harvested.csv
     fn = output_fp + '.csv'
-    bin_to_nod(lst_firebreaks, )
+    bin_to_nod(S, )
     
 
     rs_firebreaks = np.empty((m,n))
@@ -175,7 +185,7 @@ def main(directory):
     fp_var = os.path.join(directory, 'var.asc')
     var = open_as_array(fp_var, nCells)
     
-    fp_bp = os.path.join(directory, 'bp.asc')
+    fp_bp = os.path.join(directory, 'bp_base.asc')
     bp = open_as_array(fp_bp, nCells)
     
     fp_dpv = os.path.join(directory, 'dpv.asc')
@@ -185,9 +195,9 @@ def main(directory):
     for i in set_Avail:
         dtc_coordPos[i] = lst_coordCells[i-1]
     
-    fire_breack_allocator(set_Avail, dpv, bp, var, dtc_coordPos)
+    fire_breack_allocator(set_Avail, dpv, bp, var, dtc_coordPos,m,n)
 
 if __name__ == '__main__':
-    actual_dir = os.getcwd()
-    directory = os.path.join(actual_dir, '..', 'data', 'test')
+    
+    directory = "C:/Users/56965/Desktop/VaR_Valpo/Outputs/Combined_risk/"
     main(directory)
