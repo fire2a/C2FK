@@ -2,7 +2,7 @@
 #define CELLSFBP
 
 // include stuff
-#include "FuelModelSpain.h"
+#include "FuelModelKitral.h"
 #include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"

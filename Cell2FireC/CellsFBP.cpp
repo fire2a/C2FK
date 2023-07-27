@@ -1,7 +1,7 @@
 // Include classes
 #include "CellsFBP.h"
 #include "SpottingFBP.h"
-#include "FuelModelSpain.h"
+#include "FuelModelKitral.h"
 #include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"
