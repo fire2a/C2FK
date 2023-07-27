@@ -323,7 +323,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
                                                           inputs df_ptr[], fuel_coefs * coef, 
 														  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 														  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float>* crownMetrics,
-														  bool & activeCrown,double randomROS,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths) 
+														  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths) 
 	{
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -369,7 +369,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 		std::cout << "b:" << mainstruct.b << std::endl;
 		std::cout << "c:" << mainstruct.c << std::endl;
 		std::cout << "covertype: " << mainstruct.covertype << std::endl;
-		std::cout << "cros: " << mainstruct.cros << std::endl;
+		std::cout << "cros: " << mainstruct.crown << std::endl;
 		std::cout <<  "\n-------Headout Structure--------" << std::endl;
 		std::cout <<  "ros: " << headstruct.ros * args->HFactor << std::endl;
 		std::cout <<  "rss: " << headstruct.rss << std::endl;
@@ -486,8 +486,8 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				df_ptr[nb-1].waz = wdf_ptr->waz;
 				df_ptr[nb-1].ws = wdf_ptr->ws;
 				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef,args, &metrics);
-				crownState[this->realId-1]=mainstruct.cros;
-				crownState[nb-1]=metrics.cros;
+				crownState[this->realId-1]=mainstruct.crown;
+				crownState[nb-1]=metrics.crown;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
 				RateOfSpreads[nb-1]=double(std::ceil(ros * 100.0) / 100.0);
 				Intensities[this->realId-1]=mainstruct.byram;
@@ -599,7 +599,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 		std::cout << "b:" << mainstruct.b << std::endl;
 		std::cout << "c:" << mainstruct.c << std::endl;
 		std::cout << "covertype: " << mainstruct.covertype << std::endl;
-		std::cout << "cros: " << mainstruct.cros << std::endl;
+		std::cout << "cros: " << mainstruct.crown << std::endl;
 		std::cout <<  "\n-------Headout Structure--------" << std::endl;
 		std::cout <<  "ros: " << headstruct.ros * args->HFactor << std::endl;
 		std::cout <<  "rss: " << headstruct.rss << std::endl;
@@ -704,8 +704,8 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 				FSCell->push_back(double(period));
 				FSCell->push_back(ros);
 				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef,args, &metrics);
-				crownState[this->realId-1]=mainstruct.cros;
-				crownState[nb-1]=metrics.cros;
+				crownState[this->realId-1]=mainstruct.crown;
+				crownState[nb-1]=metrics.crown;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
 				RateOfSpreads[nb-1]=double(std::ceil(ros * 100.0) / 100.0);
 				Intensities[this->realId-1]=mainstruct.byram;
@@ -778,7 +778,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
     ROSThresh   double
  */
 	
-bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_coefs * coef, arguments * args, weatherDF * wdf_ptr,bool & activeCrown) {
+bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_coefs * coef, arguments * args, weatherDF * wdf_ptr,bool & activeCrown, int perimeterCells) {
     if (args->verbose) { 
         std::cout << "ROS Threshold get_burned method" << std::endl;
 		std::cout << "ROSThreshold: " << args->ROSThreshold << std::endl;

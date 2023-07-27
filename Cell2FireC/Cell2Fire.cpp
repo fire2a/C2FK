@@ -184,7 +184,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	df_ptr = & df[0]; //access reference for the first element of df
 
 	// Populate the df [nCells] objects
-	CSVParser.parseDF(df_ptr, DF,this->args_ptr, this->nCells); //iterates from the first element of df, using DF, args_ptr and the number of cells
+	CSVParser.parseDF(df_ptr, DF, this->nCells); //iterates from the first element of df, using DF, args_ptr and the number of cells
 
 	// Initialize and populate relevant vectors 
 	this->fTypeCells = std::vector<int> (this->nCells, 1); 

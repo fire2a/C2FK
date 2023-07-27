@@ -1,6 +1,6 @@
 #ifndef FUELMODELKITRAL
 #define FUELMODELKITRAL
-
+#include "ReadArgs.h"
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -19,8 +19,6 @@ typedef struct
    { char fueltype[4];
      float ws, saz, cur, ps, cbh, ccf, cbd, elev , tmp, rh;
      int waz, nftype,FMC;
-     float factor_cbd, factor_ccf, factor_ros10, factor_actv ;
-	 bool cros, verbose;
    } inputs;
 
 
@@ -81,14 +79,13 @@ float flame_height(inputs* data,  main_outs *at);
 float byram_intensity(inputs* data, main_outs* at);
 
 // Type of fire (Crown = 1, SROS = 0)
-bool fire_type(inputs *data, main_outs* atr) ;
+bool fire_type(inputs *data, main_outs* atr, int FMC) ;
 //Active crown
-bool checkActive(inputs * data,main_outs* at);
+bool checkActive(inputs * data,main_outs* at, int FMC);
 // CROS adjustements
 float final_rate_of_spreadFM10(main_outs* at) ;
 float active_rate_of_spreadFM10(inputs* data,main_outs *at); //En KITRAL SE USA PL04
-float crownfractionburn(inputs* data, main_outs* at);
-bool checkActive(inputs * data,main_outs* at);
+float crownfractionburn(inputs* data, main_outs* at,int FMC);
 
 // Back fire with CROS 
 float backfire_ros10(fire_struc *hptr, snd_outs *sec) ;
@@ -97,8 +94,8 @@ float backfire_ros10(fire_struc *hptr, snd_outs *sec) ;
 float slope_effect(float elev_i, float elev_j, int cellsize);
 
 // Main function to populate spread outputs based on inputs provided from main class
-void calculate(inputs *data, inputs *head , int cellsize, fuel_coefs * ptr, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr,bool & activeCrown);
+void calculate(inputs *data, inputs *head , int cellsize, fuel_coefs * ptr, arguments *args,main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr,bool & activeCrown);
 
-void determine_destiny_metrics(inputs* data, fuel_coefs* ptr, main_outs* at);
+void determine_destiny_metrics(inputs* data, fuel_coefs* ptr,arguments *args, main_outs* at);
 
 #endif
