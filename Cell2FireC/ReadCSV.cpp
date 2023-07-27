@@ -1,5 +1,6 @@
 #include "ReadCSV.h"
-#include "FuelModelKitral.h"
+#include "FuelModelSpain.h"
+#include "ReadArgs.h"
 
 #include <iostream>
 #include <fstream>
@@ -24,21 +25,46 @@ CSVReader::CSVReader(std::string filename, std::string delm){
 * Parses through csv file line by line and returns the data
 * in vector of vector of strings.
 */
-std::vector<std::vector<std::string>> CSVReader::getData(){
+std::vector<std::vector<std::string>> CSVReader::getData() {
 	std::ifstream file(this->fileName);
 	std::vector<std::vector<std::string> > dataList;
 	std::string line = "";
-	
 	// Iterate through each line and split the content using delimeter
-	while (getline(file, line))
-	{
-		std::vector<std::string> vec;
-		boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
-		dataList.push_back(vec);
+	if (this->fileName.substr(this->fileName.find_last_of(".") + 1) == "asc") {
+		int header = 0;
+		while (getline(file, line)) {
+			if (header < 5) {
+				std::vector<std::string> vec;
+				int start = 0;
+				int end = 0;
+				while ((start = line.find_first_not_of(this->delimeter, end)) != std::string::npos) {
+					end = line.find(this->delimeter, start);
+					vec.push_back(line.substr(start, end - start));
+				}
+				dataList.push_back(vec);
+				header++;
+			}
+			else {
+				std::vector<std::string> vec;
+				boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
+				dataList.push_back(vec);
+			}
+
+		}
 	}
+
+	else {
+		while (getline(file, line)) {
+			std::vector<std::string> vec;
+			boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
+			dataList.push_back(vec);
+		}
+	}
+
+
 	// Close the File
 	file.close();
- 
+
 	return dataList;
 }
 
@@ -153,7 +179,7 @@ void CSVReader::parseNDF(std::vector<int> &NFTypes, std::vector<std::vector<std:
 
 
 /*
-* Populates vector of size NCells with probability of ignition of each cell
+* Populates vector of size NCells with type number based on lookup table (Spain version)
 */
 void CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<std::string>>& DF, int NCells) {
 	int i;
@@ -185,23 +211,17 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr, std::vector<std::vector<std:
 	int i;
 	
 	//Strings
-	std::string instance, datetime;
 	std::string::size_type sz;   // alias of size_t
 	
 	//Floats 
 	float ws, waz, tmp, rh;
 	
-	//Ints 
-	//int scenario;
 	
 	// Loop over cells (populating per row)
 	for (i=1; i <= WPeriods; i++){
 		//printf("Populating Weather DF period %d\n", i);
-		instance = DF[i][0];
-		datetime = DF[i][1];
-		
 		if (DF[i][3].compare("") == 0) waz = 0;
-		else {waz = std::stof (DF[i][3] ,&sz); //+ 180/2;   // DEBUGGING THE ANGLE 
+		else {waz = std::stoi (DF[i][3] ,&sz); //+ 180/2;   // DEBUGGING THE ANGLE 
 			if (waz >= 360){
 				waz = waz - 360;
 			}
@@ -218,8 +238,6 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr, std::vector<std::vector<std:
 
 
 		// Set values
-		wdf_ptr->instance = instance;
-		wdf_ptr->datetime = datetime;
 		wdf_ptr->ws=ws; wdf_ptr->waz=waz; 
 		//wdf_ptr->scenario = scenario;
 		wdf_ptr->tmp = tmp; wdf_ptr->rh = rh;
@@ -321,17 +339,16 @@ void CSVReader::parseForestDF(forestDF * frt_ptr, std::vector<std::vector<std::s
 	int cellside, rows, cols;
 	int i, j;
 	double xllcorner, yllcorner;
+	//std::string xllcorner;
 	std::string::size_type sz;   // alias of size_t
 	std::unordered_map<std::string, int> Aux;
 	std::vector<int> Aux2;
-
 	cols = std::stoi(DF[0][1], &sz);
 	rows = std::stoi(DF[1][1], &sz);
 
 	// Others 
-	std::vector<std::unordered_map<std::string, int>> adjCells;
+	//std::vector<std::unordered_map<std::string, int>> adjCells; //Change this to a function for memory improvement
 	std::vector<std::vector<int>> coordCells;
-
 	
 	std::string North = "N";
     std::string South = "S";
@@ -341,10 +358,10 @@ void CSVReader::parseForestDF(forestDF * frt_ptr, std::vector<std::vector<std::s
     std::string NorthWest = "NW";
     std::string SouthEast = "SE";
     std::string SouthWest = "SW";
-	
+	//Maybe parse only for avail cells
 	// Filling DF
 	//DEBUGprintf("Populating Forest DF\n");
-	
+
 	xllcorner = std::stod(DF[2][1], &sz);
 	yllcorner = std::stod(DF[3][1], &sz);
 	cellside = std::stoi(DF[4][1], &sz); //length of a side of the square
@@ -368,122 +385,14 @@ void CSVReader::parseForestDF(forestDF * frt_ptr, std::vector<std::vector<std::s
 					
 			/*   Adjacents  */
 			// if we have rows (not a forest = line)
-			if (rows>1){
-				
-				// Initial row
-				if(r == 0){
-					
-					if (c == 0){
-                        Aux = {{North,-1},{NorthEast,-1},{NorthWest,-1},{South,n+cols},{SouthEast,n+cols+1}, 
-							        {SouthWest,-1}, {East,n+1},{West,-1}};
-                        adjCells.push_back(Aux);
-						n++;
-					}
-                    if (c == cols - 1){
-                        Aux = {{North,-1},{NorthEast,-1},{NorthWest,-1},{South, n+cols},{SouthEast,-1},
-										{SouthWest, n+cols-1,}, {East,-1}, {West,n-1}};
-						adjCells.push_back(Aux);
-                        n++;
-					}
-                    if (c > 0 && c < cols-1){    
-                        Aux = {{North, -1},{NorthEast,-1},{NorthWest,-1},{South,n+cols},{SouthEast,n+cols+1}, 
-									{SouthWest, n+cols-1}, {East, n+1},{West,n-1}};
-						adjCells.push_back(Aux);
-						n++;
-					}
-				}
-				
-				// In between
-				if (r > 0 && r < rows - 1){
-                    if (c == 0){
-                        Aux = {{North, n-cols} , {NorthEast, n-cols+1 }, {NorthWest,-1}, {South, n+cols}, 
-									{SouthEast, n+cols+1} , {SouthWest,-1}, {East, n+1} ,{West,-1}};
-						adjCells.push_back(Aux);
-                        n++;
-					}
-                    if (c == cols-1){
-                        Aux = {{North, n-cols}, {NorthEast,-1}, {NorthWest, n-cols-1},{South, n+cols}, 
-									{SouthEast,-1}, {SouthWest, n+cols-1}, {East,-1}, {West, n-1}};
-                        adjCells.push_back(Aux);
-						n++;
-					}
-                    if (c>0 && c<cols-1){    
-                        Aux = {{North, n-cols}, {NorthEast, n-cols+1} , {NorthWest, n-cols-1}, {South, n+cols}, 
-									{SouthEast, n+cols+1} , {SouthWest, n+cols-1}, {East, n+1}, {West, n-1}};
-						adjCells.push_back(Aux);
-                        n++;    
-					}
-				}
-				
-				// Final row
-				if (r == rows-1){
-                    if (c == 0){
-                        Aux = {{North,n-cols}, {NorthEast,n-cols+1}, {NorthWest,-1}, {South,-1}, {SouthEast,-1}, 
-									{SouthWest,-1,}, {East,n+1}, {West,-1}};
-						adjCells.push_back(Aux);				 
-                        n++;    
-					}
-                        
-                    if (c == cols-1){
-                        Aux = {{North,n-cols}, {NorthEast,-1}, {NorthWest,n-cols-1}, {South,-1}, {SouthEast,-1}, 
-									{SouthWest,-1}, {East,-1}, {West,n-1}};
-						adjCells.push_back(Aux);
-                        n++;    
-					}
-                    if (c>0 && c<cols-1){    
-                        Aux = {{North,n-cols}, {NorthEast, n-cols+1}, {NorthWest,n-cols-1}, {South,-1}, 
-									{SouthEast,-1} , {SouthWest,-1}, {East,n+1}, {West,n-1}};
-						adjCells.push_back(Aux);
-						n++;    
-					}
-				
-				}
-			}	
-				
-			// One line
-			if (rows == 1){
-				if (c == 0){
-					Aux = {{North,-1}, {NorthEast,-1}, {NorthWest,-1}, {South,-1}, {SouthEast,-1}, 
-								{SouthWest,-1}, {East,n+1}, {West,-1}};
-					adjCells.push_back(Aux);
-					n++;    
-				}
-				if (c == cols-1){
-					Aux = {{North,-1}, {NorthEast,-1}, {NorthWest,-1}, {South,-1}, {SouthEast,-1}, 
-								{SouthWest,-1}, {East,-1},{West,n-1}};
-					adjCells.push_back(Aux);
-					n++;    
-				}
-				if (c>0 && c<cols-1){						
-					Aux = {{North,-1}, {NorthEast,-1}, {NorthWest,-1}, {South,-1}, {SouthEast,-1}, 
-								{SouthWest,-1}, {East,n+1}, {West,n-1}};
-					adjCells.push_back(Aux);
-					n++;    
-				}
-			}
 		}
 	}
-	
-	
-	
-	// Adjacents cells
-	//std::cout  << "Adjacents Debug" << std::endl;
-	/*for (i=0; i<adjCells.size();i++){
-		std::cout << "Cell "<< i+1 << " =  "; 
-		for (auto & nb : adjCells[i]){
-			std::cout << " " << nb.first << " : " << nb.second;
-		}
-		std::cout << std::endl;
-	}
-	*/
-	
-	
 	// Set values
 	frt_ptr->cellside = cellside;
 	frt_ptr->rows = rows;
 	frt_ptr->cols = cols;
 	frt_ptr->coordCells = coordCells;
-	frt_ptr->adjCells = adjCells;
+	//frt_ptr->adjCells = adjCells;
 	frt_ptr->xllcorner = xllcorner;
 	frt_ptr->yllcorner = yllcorner;
 		
@@ -500,8 +409,6 @@ void CSVReader::printDF(inputs df){
 
 
 void CSVReader::printWeatherDF(weatherDF wdf){
-	//std::cout << wdf.scenario; 
-	std::cout << " " << wdf.datetime; 
 	std::cout << " " << wdf.ws; std::cout << " " << wdf.waz;
 	std::cout << " " << wdf.tmp; std::cout << " " << wdf.rh;
 }

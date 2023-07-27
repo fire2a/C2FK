@@ -72,7 +72,7 @@ class GenHeur(object):
             return ncomponents
         """
         Given an individual, calculate the total fitness function as:
-        Fitness = + FPV harvested: total FPV value harvested
+        Fitness = + FPV firebreak: total FPV value firebreak
                   - Demand deviation: penalty w.r.t. the extra/lower demand satisfaction
                   - Adjacency penalty: if cells are not adjacent (connected graph), 
                                        penalyze by the number of non-connected components
@@ -98,11 +98,11 @@ class GenHeur(object):
 
             # Feasible (harvesting available cells)
             feasC = 0
-            HCells = np.arange(1, self._NCells + 1)
-            HCells = HCells[mask]
-            HCells = set(HCells)
+            FCells = np.arange(1, self._NCells + 1)
+            FCells = FCells[mask]
+            FCells = set(FCells)
             
-            if len(HCells - AvailCells) > 0:
+            if len(FCells - AvailCells) > 0:
                 feasC = 1e10
 
             # Total fitness
@@ -112,7 +112,7 @@ class GenHeur(object):
         
         """
         Individual initialization functions
-        Creates a list of 0s-1s with 1s = demand/number of cells to be harvested
+        Creates a list of 0s-1s with 1s = demand/number of cells to be firebreak
         CP: Will be modified to account for the volume or simply use random initialization.
         """
         def ddshf():
@@ -175,15 +175,15 @@ class GenHeur(object):
         best_individual = tools.selBest(result, k=1)[0]
 
         # Translate best individual to cells
-        HCells = np.arange(1, self._NCells + 1)
+        FCells = np.arange(1, self._NCells + 1)
         mask2 = np.asarray(best_individual, dtype=np.bool)
-        HCells = set(HCells[mask2])
+        FCells = set(FCells[mask2])
         
         # Print-out Information
         if self._verbose:
             print("Best individual:\n", np.reshape(best_individual, (self._Rows, self._Cols)))
             print('Fitness of the best individual:\n', evalFPV(best_individual)[0])
-            print('Cells harvested:', HCells)
+            print('Firebreak Cells:', FCells)
 
         # Update first call
         self._firstCall = False
@@ -191,8 +191,8 @@ class GenHeur(object):
         # Print fitness
         print("Total fitness (FPV):", evalFPV(best_individual))
         
-        # Return harvested cells set 
-        return HCells
+        # Return firebreak cells set 
+        return FCells
     
     # Set FPV Matrix
     def setFPV(self, Matrix):
@@ -224,7 +224,7 @@ class Heuristic(object):
                  OutFolder="",           # Output Folder path
                  AvailCells=set(),       # AvailCells
                  BurntCells=set(),       # BurntCells
-                 HarvestedCells=set(),   # Harvested Cells
+                 FirebreakCells=set(),   # Firebreak Cells
                  AdjCells=[],            # Adjacent cells info
                  NCells=0,               # Number of cells inside the forest
                  Cols=0,                 # Number of columns inside the forest 
@@ -243,7 +243,7 @@ class Heuristic(object):
         self._OutFolder = OutFolder
         self._AvailCells = AvailCells
         self._BurntCells = BurntCells
-        self._HarvestedCells = HarvestedCells
+        self._FirebreakCells = FirebreakCells
         self._AdjCells = AdjCells
         self._NCells = NCells
         self._Cols = Cols
@@ -279,6 +279,16 @@ class Heuristic(object):
             Alg = "BC"
         elif self._version == 5:
             Alg = "BP"
+        elif self._version == 10:
+            Alg = "DPV_NoAdj"
+        elif self._version == 18:
+            Alg = "BC_NoAdj"
+        elif self._version == 4:
+            Alg = "BP_NoAdj"
+        elif self._version == 0:
+            Alg = "Random_NoAdj"
+        elif self._version == 1:
+            Alg = "Random"
         
         # Read txt files with messages (array with name of files) 
         msgFiles = glob.glob(self._MessagePath + '/*.csv')
@@ -730,13 +740,13 @@ class Heuristic(object):
 
     # Run the curret heuristic        
     def runHeur(self, AvailCells, Adjacents, VolCells, Demand, Utility, Year):
-        # Initialize toHarvestCells set (cells to be harvested this period)
-        toHarvestCells = set()
+        # Initialize tofirebreakCells set (cells to be firebreak this period)
+        toFirebreakCells = set()
 
         # Demand should be at least 1 if non negative
         if Demand == 0:
             Demand = 1
-        # If -1, run the forest without any harvesting plan 
+        # If -1, run the forest without any firebreak plan 
         if Demand < 0:
             Demand = 0
         
@@ -756,7 +766,7 @@ class Heuristic(object):
                   "\nindpb:\t", self._GA._indpb)
 
             # Get action
-            toHarvestCells = self._GA.GeneticSel(AvailCells, VolCells, Demand, 
+            toFirebreakCells = self._GA.GeneticSel(AvailCells, VolCells, Demand, 
                                                  Utility, Year)
         
         # Greedy Selection 
@@ -778,22 +788,22 @@ class Heuristic(object):
 
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
+                    print("\ttoFirebreakCells:", toFirebreakCells)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
 
                 # Main loop for satisfying the demand
                 toSelect = np.asarray([i for i in AvailCells])
                 randomCells = npr.choice(toSelect, replace=False, size=Demand)
-                toHarvestCells |= set(randomCells)
+                toFirebreakCells |= set(randomCells)
                 AvailCells -= set(randomCells)
                 HCs += list(randomCells - 1)
                 TotalProduction += VolCells[randomCells - 1]
                 TotalUtility += Utility[randomCells - 1]
 
                 if self._verbose:
-                    print("--- Adding", randomCell, "to the harvested cells ---")
-                    print("\ttoHarvestCells:", toHarvestCells)
+                    print("--- Adding", randomCell, "to the firebreak cells ---")
+                    print("\ttoFirebreakCells:", toFirebreakCells)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
                     
@@ -819,20 +829,20 @@ class Heuristic(object):
                 randomCells = npr.choice(toSelect, replace=False, size=1)
                 AvailCells -= set(randomCells)
                     
-                # Iintialize Harvested cells array
+                # Iintialize Firebreak cells array
                 HCs += list(randomCells - 1)
 
                 # Update auxiliary sets
-                toHarvestCells = set(randomCells)
-                AdjHarvested = set([adj[0] for adj in Adjacents[randomCells[0] - 1].values() if adj != None])
+                toFirebreakCells = set(randomCells)
+                AdjFirebreak = set([adj[0] for adj in Adjacents[randomCells[0] - 1].values() if adj != None])
                 TotalProduction += VolCells[randomCells[0] - 1]
                 TotalUtility += Utility[randomCells[0] - 1]
                 j = 0
 
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
-                    print("\tAdjHarvested:", AdjHarvested)
+                    print("\ttoFirebreakCells:", toFirebreakCells)
+                    print("\tAdjFirebreak:", AdjFirebreak)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
 
@@ -845,25 +855,25 @@ class Heuristic(object):
                     # Greedy Selection
                     if self._GreedySelection:
                         for j in range(len(idx.copy())):
-                            # If cell is adjacent to the previous harvested, harvest it (greedy)
-                            if idx[j] in AdjHarvested and idx[j] in AvailCells:
+                            # If cell is adjacent to the previous Firebreak, Firebreak it (greedy)
+                            if idx[j] in AdjFirebreak and idx[j] in AvailCells:
                                 toAdd = idx.pop(j)
-                                toHarvestCells.add(toAdd)
+                                toFirebreakCells.add(toAdd)
                                 HCs += [toAdd]
 
                                 # Adjacent constraint
                                 ADJ = set([adj[0] for adj in Adjacents[toAdd - 1].values() if adj != None])
-                                AdjHarvested |= ADJ
-                                AdjHarvested.remove(toAdd)
+                                AdjFirebreak |= ADJ
+                                AdjFirebreak.remove(toAdd)
                                 AvailCells -= set([toAdd])
                                 TotalProduction += VolCells[toAdd - 1]
                                 TotalUtility += Utility[toAdd - 1]
                                 noUpdate=False
                                                                         
                                 if self._verbose:
-                                    print("--- Adding", toAdd, "to the harvested cells ---")
-                                    print("\ttoHarvestCells:", toHarvestCells)
-                                    print("\tAdjHarvested:", AdjHarvested)
+                                    print("--- Adding", toAdd, "to the firebreak cells ---")
+                                    print("\ttoFirebreakCells:", toFirebreakCells)
+                                    print("\tAdjFirebreak:", AdjFirebreak)
                                     print("\tTotal Production:", TotalProduction)
                                     print("\tTotal Utility:", TotalUtility)
                                     print("j:", j)
@@ -873,7 +883,7 @@ class Heuristic(object):
                                     
                             
                         
-                        # Check if for loop did not update the harvesting plan (break while, infeasible)
+                        # Check if for loop did not update the Firebreak plan (break while, infeasible)
                         if noUpdate:
                             print("Demand was not satisfied... Infeasible period", Year)
                             break
@@ -900,17 +910,17 @@ class Heuristic(object):
                 if self._verbose:
                     print("idx:", idx)
 
-               # Initialize Harvested cells array
+               # Initialize Firebreak cells array
                 HCs = HCs + [idx[:Demand]]
                 
                 # Update auxiliary sets
-                toHarvestCells = set(idx[:Demand])
+                toFirebreakCells = set(idx[:Demand])
                 TotalProduction += VolCells[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 TotalUtility += Utility[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
+                    print("\ttoFirebreakCells:", toFirebreakCells)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
 
@@ -929,20 +939,20 @@ class Heuristic(object):
                 if self._verbose:
                     print("idx:", idx)
 
-                # Iintialize Harvested cells array
+                # Iintialize Firebreak cells array
                 HCs = HCs + [idx[0]]
 
                 # Update auxiliary sets
-                toHarvestCells = set([idx[0]])
-                AdjHarvested = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
+                toFirebreakCells = set([idx[0]])
+                AdjFirebreak = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
                 TotalProduction += VolCells[idx[0] - 1]
                 TotalUtility += Utility[idx[0] - 1]
                 j = 1
 
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
-                    print("\tAdjHarvested:", AdjHarvested)
+                    print("\ttoFirebreakCells:", toFirebreakCells)
+                    print("\tAdjFirebreak:", AdjFirebreak)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
 
@@ -955,25 +965,25 @@ class Heuristic(object):
                     # Greedy Selection
                     if self._GreedySelection:
                         for j in range(len(idx.copy())):
-                            # If cell is adjacent to the previous harvested, harvest it (greedy)
-                            if idx[j] in AdjHarvested and idx[j] in AvailCells:
+                            # If cell is adjacent to the previous Firebreak, Firebreak it (greedy)
+                            if idx[j] in AdjFirebreak and idx[j] in AvailCells:
                                 toAdd = idx.pop(j)
-                                toHarvestCells.add(toAdd)
+                                toFirebreakCells.add(toAdd)
                                 HCs += [toAdd]
 
                                 # Adjacent constraint
                                 ADJ = set([adj[0] for adj in Adjacents[toAdd - 1].values() if adj != None])
-                                AdjHarvested |= ADJ
-                                AdjHarvested.remove(toAdd)
+                                AdjFirebreak |= ADJ
+                                AdjFirebreak.remove(toAdd)
                                 AvailCells -= set([toAdd])
                                 TotalProduction += VolCells[toAdd - 1]
                                 TotalUtility += Utility[toAdd - 1]
                                 noUpdate=False
                                                                         
                                 if self._verbose:
-                                    print("--- Adding", toAdd, "to the harvested cells ---")
-                                    print("\ttoHarvestCells:", toHarvestCells)
-                                    print("\tAdjHarvested:", AdjHarvested)
+                                    print("--- Adding", toAdd, "to the Firebreak cells ---")
+                                    print("\ttoHarvestCells:", toFirebreakCells)
+                                    print("\tAdjHarvested:", AdjFirebreak)
                                     print("\tTotal Production:", TotalProduction)
                                     print("\tTotal Utility:", TotalUtility)
                                     print("j:", j)
@@ -1021,13 +1031,13 @@ class Heuristic(object):
                 HCs = HCs + [idx[:Demand]]
                 
                 # Update auxiliary sets
-                toHarvestCells = set(idx[:Demand])
+                toFirebreakCells = set(idx[:Demand])
                 TotalProduction += VolCells[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 TotalUtility += Utility[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
+                    print("\ttoHarvestCells:", toFirebreakCells)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
                 
@@ -1057,8 +1067,8 @@ class Heuristic(object):
                 HCs = HCs + [idx[0]]
 
                 # Update auxiliary sets
-                toHarvestCells = set([idx[0]])
-                AdjHarvested = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
+                toFirebreakCells = set([idx[0]])
+                AdjFirebreak = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
                 AvailCells -= set([idx[0]])
                 TotalProduction += VolCells[idx[0] - 1]
                 TotalUtility += Utility[idx[0] - 1]
@@ -1066,8 +1076,8 @@ class Heuristic(object):
 
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
-                    print("\tAdjHarvested:", AdjHarvested)
+                    print("\ttoHarvestCells:", toFirebreakCells)
+                    print("\tAdjHarvested:", AdjFirebreak)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
 
@@ -1081,15 +1091,15 @@ class Heuristic(object):
                     if self._GreedySelection:
                         for j in range(len(idx.copy())):
                             # If cell is adjacent to the previous harvested, harvest it (greedy)
-                            if idx[j] in AdjHarvested and idx[j] in AvailCells:
+                            if idx[j] in AdjFirebreak and idx[j] in AvailCells:
                                 toAdd = idx.pop(j)
-                                toHarvestCells.add(toAdd)
+                                toFirebreakCells.add(toAdd)
                                 HCs += [toAdd]
 
                                 # Adjacent constraint
                                 ADJ = set([adj[0] for adj in Adjacents[toAdd - 1].values() if adj != None])
-                                AdjHarvested |= ADJ
-                                AdjHarvested.remove(toAdd)
+                                AdjFirebreak |= ADJ
+                                AdjFirebreak.remove(toAdd)
                                 AvailCells -= set([toAdd])
                                 TotalProduction += VolCells[toAdd - 1]
                                 TotalUtility += Utility[toAdd - 1]
@@ -1097,8 +1107,8 @@ class Heuristic(object):
                                                                         
                                 if self._verbose:
                                     print("--- Adding", toAdd, "to the harvested cells ---")
-                                    print("\ttoHarvestCells:", toHarvestCells)
-                                    print("\tAdjHarvested:", AdjHarvested)
+                                    print("\ttoHarvestCells:", toFirebreakCells)
+                                    print("\tAdjHarvested:", AdjFirebreak)
                                     print("\tTotal Production:", TotalProduction)
                                     print("\tTotal Utility:", TotalUtility)
                                     print("j:", j)
@@ -1143,7 +1153,7 @@ class Heuristic(object):
                 HCs = HCs + [idx[:Demand]]
 
                 # Update auxiliary sets
-                toHarvestCells = set(idx[:Demand])
+                toFirebreakCells = set(idx[:Demand])
                 TotalProduction += VolCells[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 TotalUtility += Utility[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 AvailCells -= set(idx[:Demand])
@@ -1151,7 +1161,7 @@ class Heuristic(object):
                 # Information
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
+                    print("\ttoHarvestCells:", toFirebreakCells)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
                     
@@ -1182,8 +1192,8 @@ class Heuristic(object):
                 HCs = HCs + [idx[0]]
 
                 # Update auxiliary sets
-                toHarvestCells = set([idx[0]])
-                AdjHarvested = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
+                toFirebreakCells = set([idx[0]])
+                AdjFirebreak = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
                 TotalProduction += VolCells[idx[0] - 1]
                 TotalUtility += Utility[idx[0] - 1]
                 j = 1
@@ -1191,8 +1201,8 @@ class Heuristic(object):
                 # Info
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
-                    print("\tAdjHarvested:", AdjHarvested)
+                    print("\ttoHarvestCells:", toFirebreakCells)
+                    print("\tAdjHarvested:", AdjFirebreak)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
                     
@@ -1204,15 +1214,15 @@ class Heuristic(object):
                     if self._GreedySelection:
                         for j in range(len(idx.copy())):
                             # If cell is adjacent to the previous harvested, harvest it (greedy)
-                            if idx[j] in AdjHarvested and idx[j] in AvailCells:
+                            if idx[j] in AdjFirebreak and idx[j] in AvailCells:
                                 toAdd = idx.pop(j)
-                                toHarvestCells.add(toAdd)
+                                toFirebreakCells.add(toAdd)
                                 HCs += [toAdd]
 
                                 # Adjacent constraint
                                 ADJ = set([adj[0] for adj in Adjacents[toAdd - 1].values() if adj != None])
-                                AdjHarvested |= ADJ
-                                AdjHarvested.remove(toAdd)
+                                AdjFirebreak |= ADJ
+                                AdjFirebreak.remove(toAdd)
                                 AvailCells -= set([toAdd])
                                 TotalProduction += VolCells[toAdd - 1]
                                 TotalUtility += Utility[toAdd - 1]
@@ -1220,8 +1230,8 @@ class Heuristic(object):
                                 
                                 if self._verbose:
                                     print("--- Adding", toAdd, "to the harvested cells ---")
-                                    print("\ttoHarvestCells:", toHarvestCells)
-                                    print("\tAdjHarvested:", AdjHarvested)
+                                    print("\ttoHarvestCells:", toFirebreakCells)
+                                    print("\tAdjHarvested:", AdjFirebreak)
                                     print("\tTotal Production:", TotalProduction)
                                     print("\tTotal Utility:", TotalUtility)
                                     print("j:", j)
@@ -1270,8 +1280,8 @@ class Heuristic(object):
                     HCs = HCs + [idx[0]]
 
                     # Update auxiliary sets
-                    toHarvestCells = set([idx[0]])
-                    AdjHarvested = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
+                    toFirebreakCells = set([idx[0]])
+                    AdjFirebreak = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
                     TotalProduction += VolCells[idx[0] - 1]
                     TotalUtility += Utility[idx[0] - 1]
                     j = 1
@@ -1279,9 +1289,9 @@ class Heuristic(object):
                 # Info
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
+                    print("\ttoHarvestCells:", toFirebreakCells)
                     if self._Adj is True:
-                        print("\tAdjHarvested:", AdjHarvested)
+                        print("\tAdjHarvested:", AdjFirebreak)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
 
@@ -1294,15 +1304,15 @@ class Heuristic(object):
                         if self._GreedySelection:
                             for j in range(len(idx.copy())):
                                 # If cell is adjacent to the previous harvested, harvest it (greedy)
-                                if idx[j] in AdjHarvested and idx[j] in AvailCells:
+                                if idx[j] in AdjFirebreak and idx[j] in AvailCells:
                                     toAdd = idx.pop(j)
-                                    toHarvestCells.add(toAdd)
+                                    toFirebreakCells.add(toAdd)
                                     HCs += [toAdd]
 
                                     # Adjacent constraint
                                     ADJ = set([adj[0] for adj in Adjacents[toAdd - 1].values() if adj != None])
-                                    AdjHarvested |= ADJ
-                                    AdjHarvested.remove(toAdd)
+                                    AdjFirebreak |= ADJ
+                                    AdjFirebreak.remove(toAdd)
                                     AvailCells -= set([toAdd])
                                     TotalProduction += VolCells[toAdd - 1]
                                     TotalUtility += Utility[toAdd - 1]
@@ -1310,8 +1320,8 @@ class Heuristic(object):
                                                                         
                                     if self._verbose:
                                         print("--- Adding", toAdd, "to the harvested cells ---")
-                                        print("\ttoHarvestCells:", toHarvestCells)
-                                        print("\tAdjHarvested:", AdjHarvested)
+                                        print("\ttoHarvestCells:", toFirebreakCells)
+                                        print("\tAdjHarvested:", AdjFirebreak)
                                         print("\tTotal Production:", TotalProduction)
                                         print("\tTotal Utility:", TotalUtility)
                                         print("j:", j)
@@ -1335,14 +1345,14 @@ class Heuristic(object):
                     HCs = HCs + [idx[:Demand]]
 
                     # Update auxiliary sets
-                    toHarvestCells = set(idx[:Demand])
+                    toFirebreakCells = set(idx[:Demand])
                     TotalProduction += VolCells[np.asarray(idx[:Demand]).astype(np.int) - 1]
                     TotalUtility += Utility[np.asarray(idx[:Demand]).astype(np.int) - 1]
                     AvailCells -= set(idx[:Demand])
 
                     if self._verbose:
                         print("Initial values")
-                        print("\ttoHarvestCells:", toHarvestCells)
+                        print("\ttoHarvestCells:", toFirebreakCells)
                         print("\tTotal Production:", TotalProduction)
                         print("\tTotal Utility:", TotalUtility)
                     
@@ -1374,7 +1384,7 @@ class Heuristic(object):
                 HCs = HCs + [idx[:Demand]]
 
                 # Update auxiliary sets
-                toHarvestCells = set(idx[:Demand])
+                toFirebreakCells = set(idx[:Demand])
                 TotalProduction += VolCells[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 TotalUtility += Utility[np.asarray(idx[:Demand]).astype(np.int) - 1]
                 AvailCells -= set(idx[:Demand])
@@ -1382,7 +1392,7 @@ class Heuristic(object):
                 # Information
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
+                    print("\ttoHarvestCells:", toFirebreakCells)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
                
@@ -1412,8 +1422,8 @@ class Heuristic(object):
                 HCs = HCs + [idx[0]]
 
                 # Update auxiliary sets
-                toHarvestCells = set([idx[0]])
-                AdjHarvested = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
+                toFirebreakCells = set([idx[0]])
+                AdjFirebreak = set([adj[0] for adj in Adjacents[idx[0] - 1].values() if adj != None])
                 TotalProduction += VolCells[idx[0] - 1]
                 TotalUtility += Utility[idx[0] - 1]
                 j = 1
@@ -1421,8 +1431,8 @@ class Heuristic(object):
                 # Info
                 if self._verbose:
                     print("Initial values")
-                    print("\ttoHarvestCells:", toHarvestCells)
-                    print("\tAdjHarvested:", AdjHarvested)
+                    print("\ttoHarvestCells:", toFirebreakCells)
+                    print("\tAdjHarvested:", AdjFirebreak)
                     print("\tTotal Production:", TotalProduction)
                     print("\tTotal Utility:", TotalUtility)
                     
@@ -1435,15 +1445,15 @@ class Heuristic(object):
                     if self._GreedySelection:
                         for j in range(len(idx.copy())):
                             # If cell is adjacent to the previous harvested, harvest it (greedy)
-                            if idx[j] in AdjHarvested and idx[j] in AvailCells:
+                            if idx[j] in AdjFirebreak and idx[j] in AvailCells:
                                 toAdd = idx.pop(j)
-                                toHarvestCells.add(toAdd)
+                                toFirebreakCells.add(toAdd)
                                 HCs += [toAdd]
 
                                 # Adjacent constraint
                                 ADJ = set([adj[0] for adj in Adjacents[toAdd - 1].values() if adj != None])
-                                AdjHarvested |= ADJ
-                                AdjHarvested.remove(toAdd)
+                                AdjFirebreak |= ADJ
+                                AdjFirebreak.remove(toAdd)
                                 AvailCells -= set([toAdd])
                                 TotalProduction += VolCells[toAdd - 1]
                                 TotalUtility += Utility[toAdd - 1]
@@ -1451,8 +1461,8 @@ class Heuristic(object):
                                 
                                 if self._verbose:
                                     print("--- Adding", toAdd, "to the harvested cells ---")
-                                    print("\ttoHarvestCells:", toHarvestCells)
-                                    print("\tAdjHarvested:", AdjHarvested)
+                                    print("\ttoHarvestCells:", toFirebreakCells)
+                                    print("\tAdjHarvested:", AdjFirebreak)
                                     print("\tTotal Production:", TotalProduction)
                                     print("\tTotal Utility:", TotalUtility)
                                     print("j:", j)
@@ -1478,13 +1488,13 @@ class Heuristic(object):
             
             # Display harvested cells
             if self._verbose:
-                print("Heuristic toHarvestCells:", toHarvestCells)
+                print("Heuristic toHarvestCells:", toFirebreakCells)
 
         # Return harvested cells set
         auxFPV = np.reshape(self._FPVMatrix, (self._NCells,))
-        auxCells = [i-1 for i in toHarvestCells]
+        auxCells = [i-1 for i in toFirebreakCells]
 
-        return toHarvestCells, np.sum(auxFPV[auxCells]) 
+        return toFirebreakCells, np.sum(auxFPV[auxCells]) 
     
     # Plot style
     def pltStyle(self):
@@ -1524,6 +1534,16 @@ class Heuristic(object):
             Alg = "BC"
         elif self._version == 5:
             Alg = "BP"
+        elif self._version == 10:
+            Alg = "DPV_NoAdj"
+        elif self._version == 18:
+            Alg = "BC_NoAdj"
+        elif self._version == 4:
+            Alg = "BP_NoAdj"
+        elif self._version == 0:
+            Alg = "Random_NoAdj"
+        elif self._version == 1:
+            Alg = "Random"
         
         # Title and labels
         plt.title(Alg + " Heatmap $|R| = 100$", y=1.02)
@@ -1687,7 +1707,7 @@ class Heuristic(object):
         aux = 0
         aux2 = 0
         DFS = {}
-        keepCols = ["Burned", "NonBurned", "Harvested", "TreatedFraction", "Criterion"]
+        keepCols = ["Burned", "NonBurned", "Firebreak", "TreatedFraction", "Criterion"]
 
         # Get all final stats
         for path in Paths:

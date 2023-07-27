@@ -69,7 +69,7 @@ def Dictionary(filename):
             elif line[3][0:3] in ["Non", "NFn"]:
                 row[line[0]] = "NF"
             else:    
-                row[line[0]] = line[3][0:4]
+                row[line[0]] = line[3][0:3]
                 
             colors[line[0]] = (float(line[4]) / 255.0, 
                                float(line[5]) / 255.0,
@@ -136,10 +136,10 @@ def ForestGrid(filename, Dictionary):
         
         for c in line: #range(0,len(line)-1):
             if c not in Dictionary.keys():
-                gridcell1.append("NData")
-                gridcell2.append("NData")
+                gridcell1.append("NF")
+                gridcell2.append("NF")
                 gridcell3.append(int(0))
-                gridcell4.append("NData")
+                gridcell4.append("NF")
             else:
                 gridcell1.append(c)
                 gridcell2.append(Dictionary[c])
@@ -316,7 +316,7 @@ Returns         dict {string:int}, dict {int: (double, double, double, double)}
 Inputs:
 filename        str
 '''
-# Reads kitral_lookup_table.csv and creates dictionaries for the fuel types and cells' colors (Pandas' version) 
+# Reads spain_lookup_table.csv and creates dictionaries for the fuel types and cells' colors (Pandas' version) 
 # Slower than non pandas version
 def Dictionary_PD(filename):
     FbpTable = pd.read_csv(filename, sep=",", index_col=['grid_value'])
@@ -384,49 +384,5 @@ filename        str
 # Returns specific info for cells (arrays) TDImplemented... for heuristics...
 def CellsInfo(filename, NCells):
     return np.asarray([1 for i in range(NCells)]), 0.
-
-# Reads an ASCII file with any interesting data
-def Ascii2list(path, NCells):
-    output =  np.full(NCells, np.nan)
-    ff = path
-    if os.path.isfile(ff) == True:
-        aux = 0
-        with open(ff, "r") as f:
-            filelines = f.readlines()
-
-            line = filelines[4].replace("\n","")
-            parts = line.split()
-
-            if parts[0] != "cellsize":
-                print ("line=",line)
-                raise RuntimeError('Expected cellsize on line 5 of'+ ff)
-
-            row = 1
-
-            # Read the ASCII file with the grid structure
-            for row in range(6, len(filelines)):
-                try:
-                    line = filelines[row]
-                    line = line.replace("\n","")
-                    line = ' '.join(line.split())
-                    line = line.split(" ")
-                    #print(line)
-                    for c in line:
-                        output[aux] = float(c)
-                        aux += 1
-                except ValueError:
-                    line = filelines[row]
-                    line = line.replace("\n","")
-                    line = ' '.join(line.split())
-                    line = line.split(", ")
-                    #print(line)
-                    for c in line:
-                        output[aux] = float(c)
-                        aux += 1
-
-    else:
-        print("   No", path, "file, filling with NaN")
-            
-    return output
 
 

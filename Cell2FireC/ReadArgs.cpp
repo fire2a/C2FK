@@ -8,6 +8,15 @@
 #include <string>
 #include <algorithm>
 
+inline char separator()
+{
+#if defined _WIN32 || defined __CYGWIN__
+	return '\\';
+#else
+	return '/';
+#endif
+}
+
 
 char* getCmdOption(char ** begin, char ** end, const std::string & option)
 {
@@ -24,49 +33,50 @@ bool cmdOptionExists(char** begin, char** end, const std::string& option)
     return std::find(begin, end, option) != end;
 }
 
-void parseArgs(int argc, char * argv[], arguments * args_ptr)
+void parseArgs(int argc, char* argv[], arguments* args_ptr)
 {
 	// Help
-    if(cmdOptionExists(argv, argv+argc, "-h")){
-        printf("-------------------------------------------\n         Help manual!!! \n-------------------------------------------\n");
-    }
-	
+	if (cmdOptionExists(argv, argv + argc, "-h")) {
+		printf("-------------------------------------------\n         Help manual!!! \n-------------------------------------------\n");
+	}
+
 	// Empty default
 	char empty = '\0';
-	
+
+
 	// Strings
 	//--input-instance-folder
-	char * input_folder = getCmdOption(argv, argv + argc, "--input-instance-folder");
-    if (input_folder){
-        printf("InFolder: %s \n", input_folder);
-    }
+	char* input_folder = getCmdOption(argv, argv + argc, "--input-instance-folder");
+	if (input_folder) {
+		printf("InFolder: %s \n", input_folder);
+	}
 	else input_folder = &empty;
-	
+
 	//--output-folder
-	char * output_folder = getCmdOption(argv, argv + argc, "--output-folder");
-    if (output_folder){
-        printf("OutFolder: %s \n", output_folder );
-    }
+	char* output_folder = getCmdOption(argv, argv + argc, "--output-folder");
+	if (output_folder) {
+		printf("OutFolder: %s \n", output_folder);
+	}
 	else output_folder = &empty;
-	
+
 	//--weather
-	char * input_weather = getCmdOption(argv, argv + argc, "--weather");
-    if (input_weather){
-        printf("WeatherOpt: %s \n", input_weather);
-    }
+	char* input_weather = getCmdOption(argv, argv + argc, "--weather");
+	if (input_weather) {
+		printf("WeatherOpt: %s \n", input_weather);
+	}
 	else input_weather = &empty;
-	
-	//--HarvestPlan
-	char * input_hplan = getCmdOption(argv, argv + argc, "--HarvestPlan");
-    if (input_hplan){
-        printf("HarvestPlan: %s \n", input_hplan);
-    }
+
+	//--FirebreakPlan
+	char* input_hplan = getCmdOption(argv, argv + argc, "--FirebreakCells");
+	if (input_hplan) {
+		printf("FirebreakCells: %s \n", input_hplan);
+	}
 	else input_hplan = &empty;
-		
+
 	// Booleans
 	bool out_messages = false;
 	bool out_trajectories = false;
-	bool no_output = false; 
+	bool no_output = false;
 	bool verbose_input = false;
 	bool input_ignitions = false;
 	bool out_grids = false;
@@ -80,13 +90,13 @@ void parseArgs(int argc, char * argv[], arguments * args_ptr)
 	bool out_stats = false;
 	bool bbo_tuning = false;
 	bool allow_cros = false;
-	
+
 	//--out-messages
-    if(cmdOptionExists(argv, argv+argc, "--output-messages")){
-        out_messages = true;
-        printf("OutMessages: %d \n", out_messages);
-    }
-	
+	if (cmdOptionExists(argv, argv + argc, "--output-messages")) {
+		out_messages = true;
+		printf("OutMessages: %d \n", out_messages);
+	}
+
 	//--fire-behavior
 	if (cmdOptionExists(argv, argv + argc, "--out-fl")) {
 		out_fl = true;
@@ -115,76 +125,76 @@ void parseArgs(int argc, char * argv[], arguments * args_ptr)
 	
 
 	//--trajectories
-    if(cmdOptionExists(argv, argv+argc, "--trajectories")){
-        out_trajectories = true;
-        printf("Trajectories: %d \n", out_trajectories);
-    }
-	
+	if (cmdOptionExists(argv, argv + argc, "--trajectories")) {
+		out_trajectories = true;
+		printf("Trajectories: %d \n", out_trajectories);
+	}
+
 	//--no-output
-	if(cmdOptionExists(argv, argv+argc, "--no-output")){
+	if (cmdOptionExists(argv, argv + argc, "--no-output")) {
 		no_output = true;
 		printf("noOutput: %d \n", no_output);
-    }
-	
+	}
+
 	//--verbose
-	if(cmdOptionExists(argv, argv+argc, "--verbose")){
-        verbose_input = true;
+	if (cmdOptionExists(argv, argv + argc, "--verbose")) {
+		verbose_input = true;
 		printf("verbose: %d \n", verbose_input);
-    }
-	
+	}
+
 	//--ignitions
-	if(cmdOptionExists(argv, argv+argc, "--ignitions")){
-        input_ignitions = true;
-        printf("Ignitions: %d \n", input_ignitions);
-    }
-	
+	if (cmdOptionExists(argv, argv + argc, "--ignitions")) {
+		input_ignitions = true;
+		printf("Ignitions: %d \n", input_ignitions);
+	}
+
 	//--grids
-	if(cmdOptionExists(argv, argv+argc, "--grids")){
+	if (cmdOptionExists(argv, argv + argc, "--grids")) {
 		out_grids = true;
 		printf("OutputGrids: %d \n", out_grids);
-    }
-	
+	}
+
 	//--final-grid
-	if(cmdOptionExists(argv, argv+argc, "--final-grid")){
+	if (cmdOptionExists(argv, argv + argc, "--final-grid")) {
 		out_finalgrid = true;
 		printf("FinalGrid: %d \n", out_finalgrid);
-    }
-	
-	//--Prom_tuned
-	if(cmdOptionExists(argv, argv+argc, "--PromTuned")){
-        prom_tuned = true;
-		printf("PromTuned: %d \n", prom_tuned);
-    }
-	
-	//--statistics
-	if(cmdOptionExists(argv, argv+argc, "--statistics")){
-        out_stats = true;
-		printf("Statistics: %d \n", out_stats);
-    }
-	
-	//--bbo
-	if(cmdOptionExists(argv, argv+argc, "--bbo")){
-        bbo_tuning = true;
-		printf("BBOTuning: %d \n", out_stats);
-    }
-	
-	//--cros
-	if(cmdOptionExists(argv, argv+argc, "--cros")){
-        allow_cros = true;
-		printf("CrownROS: %d \n", allow_cros);
-    }
+	}
 
-	
+	//--Prom_tuned
+	if (cmdOptionExists(argv, argv + argc, "--PromTuned")) {
+		prom_tuned = true;
+		printf("PromTuned: %d \n", prom_tuned);
+	}
+
+	//--statistics
+	if (cmdOptionExists(argv, argv + argc, "--statistics")) {
+		out_stats = true;
+		printf("Statistics: %d \n", out_stats);
+	}
+
+	//--bbo
+	if (cmdOptionExists(argv, argv + argc, "--bbo")) {
+		bbo_tuning = true;
+		printf("BBOTuning: %d \n", out_stats);
+	}
+
+	//--cros
+	if (cmdOptionExists(argv, argv + argc, "--cros")) {
+		allow_cros = true;
+		printf("CrownROS: %d \n", allow_cros);
+	}
+
+
 	// Floats and ints
 	// defaults
 	int dsim_years = 1;
 	int dnsims = 1;
-	int dweather_period_len= 60;
+	int dweather_period_len = 60;
 	int dweather_files = 1;
-	int dmax_fire_periods= 10000000;
+	int dmax_fire_periods = 10000000;
 	int dseed = 123;
-	int dnthreads = 1;
 	int diradius = 0;
+	int dnthreads = 1;
 	int dFMC=120;
 	float dROS_Threshold= 0.1;
 	float dHFI_Threshold= 0.1;
@@ -245,7 +255,7 @@ void parseArgs(int argc, char * argv[], arguments * args_ptr)
 		}
 		else args_ptr->FirePeriodLen =  args_ptr->MinutesPerWP;
     } 
-	else args_ptr->FirePeriodLen =  args_ptr->MinutesPerWP;
+	else args_ptr->FirePeriodLen = dinput_PeriodLen;
 	
 	//--IgnitionRad
 	char * input_igrad = getCmdOption(argv, argv + argc, "--IgnitionRad");
@@ -392,6 +402,10 @@ void parseArgs(int argc, char * argv[], arguments * args_ptr)
 	}
 	else args_ptr->InFolder = input_folder; 
 	
+	if (!args_ptr->InFolder.empty() && *args_ptr->InFolder.rbegin()!= separator()){
+		args_ptr->InFolder+=separator();
+	}
+
 	if (output_folder == &empty && input_folder != &empty){
 		args_ptr->OutFolder = args_ptr->InFolder + "simOuts";
 	} else if(output_folder == &empty && input_folder == &empty){
@@ -400,6 +414,10 @@ void parseArgs(int argc, char * argv[], arguments * args_ptr)
 		args_ptr->OutFolder = output_folder;
 	} else if(output_folder != &empty && input_folder != &empty){
 		args_ptr->OutFolder = output_folder;
+	}
+
+	if (!args_ptr->OutFolder.empty() && *args_ptr->OutFolder.rbegin()!= separator()){
+		args_ptr->OutFolder+=separator();
 	}
 		
 	if (input_weather == &empty){

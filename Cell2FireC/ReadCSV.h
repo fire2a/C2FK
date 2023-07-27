@@ -1,7 +1,8 @@
 #ifndef READCSV
 #define READCSV
 
-#include "FuelModelKitral.h"
+#include "FuelModelSpain.h"
+#include "ReadArgs.h"
 
 #include <iostream>
 #include <fstream>
@@ -18,7 +19,7 @@
 *   Weather structure
 */
 typedef struct
-   { std::string instance, datetime;
+   { 
       float ws, waz, tmp, rh;
       //int scenario;
    } weatherDF;
@@ -28,8 +29,8 @@ typedef struct
 */
 typedef struct
    { int cellside, rows, cols;
-	  double xllcorner, yllcorner;
-      std::vector<std::unordered_map<std::string, int>> adjCells;
+	double xllcorner, yllcorner;
+      //std::vector<std::unordered_map<std::string, int>> adjCells;
 	  std::vector<std::vector<int>> coordCells;
    } forestDF;
 

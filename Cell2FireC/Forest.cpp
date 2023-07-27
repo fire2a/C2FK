@@ -52,9 +52,3 @@ void Forest::print_info() {
 	//std::cout << "FTypes = " << this->fTypes << std::endl;
 }
 
-
-// Main for debugging
-int main(){
-	std::cout << "Forest has been compiled!" << std::endl;
-	return 0;
-}

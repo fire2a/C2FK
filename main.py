@@ -24,11 +24,11 @@ def main():
     
     # Postprocessing: Plots Stats
     if args.stats:
-        print("------ Generating Statistics --------")
+        print("------ Generating Statistics --------",flush=True)
         env.stats()
         
     if args.heuristic != -1:
-        print("------ Generating outputs for heuristics --------")
+        print("------ Generating outputs for heuristics --------",flush=True)
         env.heur() 
 
 if __name__ == "__main__":

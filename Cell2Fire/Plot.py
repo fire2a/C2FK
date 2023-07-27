@@ -7,7 +7,9 @@ __status__ = "Alpha Operational"
 # Importations
 # import sys
 import os
-import imread
+#import imread
+from PIL.Image import open as open_image
+# img = np.asarray( open_image('/home/fdo/Pictures/Lenna.png'))
 
 #Visual importations
 from matplotlib.pylab import *
@@ -686,14 +688,14 @@ class Plot:
     '''
     # Mixes the evolution plots with the base forest (initial state for saving memory/time)
     def Mix(self,Folder,filen,Sim):
-        img = imread(os.path.join(Folder, "ForestInitial.png"))
+        img = np.asarray( open_image(os.path.join(Folder, "ForestInitial.png")))
         fstr = str(filen).zfill(4)
         
         #Path and name of the file
         PathFile = os.path.join(Folder, "Plots", "Plots"+str(Sim), "forest" + fstr + ".png")
         
         # Reads the basic forest
-        img2 = imread(PathFile)
+        img2 = np.asarray( open_image(PathFile))
         
         # Over plot
         gca().set_axis_off()
@@ -710,7 +712,7 @@ class Plot:
     
     def MultiFireMix(self,Folder,nSims,mode="Scale",probs=[]):
             # Read initial forest status
-            imgForest = imread(os.path.join(Folder, "ForestInitial.png"))
+            imgForest = np.asarray( open_image(os.path.join(Folder, "ForestInitial.png")))
             #fstr = str(filen).zfill(4)
             
             # If no probs provided, alpha = 0.25 by default (otherwise, transparency is proportional to the fire probability)
@@ -730,7 +732,7 @@ class Plot:
             imgArray = []
         
             for i in range(nSims):
-                imgArray.append(imread(PathFile[i]))
+                imgArray.append(np.asarray( open_image(PathFile[i])))
                 #print(imgArray[i].shape)
             
             # Summation mode: sum the pixels values for highlighting the intersections of fires (more intense than Scale)

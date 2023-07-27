@@ -4,9 +4,8 @@ matplotlib==3.5.2
 seaborn
 imread
 tqdm
-nlopt
-opencv-python
-deap
-rasterio
+
 networkx
+rasterio
 scipy
+deap

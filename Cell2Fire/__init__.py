@@ -3,4 +3,3 @@
 import Cell2Fire.DataGeneratorC as DataGenerator
 import Cell2Fire.Stats as Stats
 import Cell2Fire.Heuristics as Heuristic
-#from Cell2Fire.ParseInputs import Init

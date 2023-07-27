@@ -2,7 +2,7 @@
 #define CELLSFBP
 
 // include stuff
-#include "FuelModelKitral.h"
+#include "FuelModelSpain.h"
 #include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"
@@ -15,6 +15,9 @@
 #include <vector>
 
 using namespace std;
+
+std::vector<int> adjacentCells(int cell, int nrows, int ncols);
+
 
 class CellsFBP {
     // TODO: find where to put the enums
@@ -29,7 +32,7 @@ class CellsFBP {
 		
         std::string fType2;
         std::vector<int> coord; //maybe change this into a tuple or class	CP: 2-tuple (int)
-		std::unordered_map<std::string, int> adjacents; // CP: dictionary {string: [int array]}
+	//std::unordered_map<std::string, int> adjacents; // CP: dictionary {string: [int array]}
 		
 		string FTypeD[3];
         string StatusD[5];
@@ -56,15 +59,13 @@ class CellsFBP {
         // constructor and methods here
         CellsFBP(int _id, double _area, std::vector<int> _coord, 
 					 int _fType, std::string _fType2, double _perimeter, 
-					 int _status, std::unordered_map<std::string, int> & _adjacents, 
-					 int _realId);
+					 int _status,  int _realId);
         
-		void initializeFireFields(std::vector<std::vector<int>> & coordCells, std::unordered_set<int> & availSet); // TODO: need TYPE
-       
-	    void ros_distr_old(double thetafire, double forward, double flank, double back);
-		double rhoTheta(double theta, double a, double b);
-		void ros_distr_FBP(double thetafire, double forward, double flank, double back, double EFactor);
-		void ros_distr(double thetafire, double a, double b, double c, double EFactor);
+	void initializeFireFields(std::vector<std::vector<int>> & coordCells, std::unordered_set<int> & availSet,int cols,int rows); // TODO: need TYPE
+        void ros_distr_old(double thetafire, double forward, double flank, double back);
+	double rhoTheta(double theta, double a, double b);
+	void ros_distr(double thetafire, double forward, double flank, double back, double EFactor);
+	void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 		
         std::vector<int> manageFire(int period, std::unordered_set<int> & AvailSet,      
                                                           inputs df[], fuel_coefs * coef, 
@@ -80,8 +81,8 @@ class CellsFBP {
 		
 		bool get_burned(int period, int season, int NMsg, inputs df[],  fuel_coefs * coef, arguments * args, weatherDF * wdf_ptr,bool & activeCrown, int perimeterCells) ;
 								
-		void set_Adj(std::unordered_map<std::string, int> & adjacentCells);
-		
+		//void set_Adj(std::unordered_map<std::string, int> & adjacentCells);
+
 		void setStatus(int status_int);
 		
 		std::string getStatus();

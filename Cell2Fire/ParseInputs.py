@@ -98,8 +98,8 @@ def ParseInputs():
                         dest="GASelection",
                         default=False,
                         action="store_true")
-    parser.add_argument("--HarvestedCells",
-                        help="File with initial harvested cells (csv with year, number of cells: e.g 1,1,2,3,4,10)",
+    parser.add_argument("--FirebreakCells",
+                        help="File with initial firebreak cells (csv with year, number of cells: e.g 1,1,2,3,4,10)",
                         dest="HCells",
                         type=str,
                         default=None)

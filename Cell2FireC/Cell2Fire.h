@@ -44,6 +44,7 @@ class Cell2Fire {
 		 int sim;
 		 int rows;
 		 int cols;
+		 int widthSims;
 		 int weatherPeriod = 0;
 		 int year = 1;
 		 int gridNumber = 0;
@@ -55,7 +56,7 @@ class Cell2Fire {
 		 double yllcorner;
 		 // Booleans
 		 bool noIgnition = true;  		//  None = -1
-		 bool activeCrown= false;
+		 bool activeCrown=false;
 		 bool messagesSent = false;
 		 bool repeatFire = false;
 		 bool done = false;
@@ -71,8 +72,12 @@ class Cell2Fire {
 		 string gridFolder;
 		 string messagesFolder;
 		 string rosFolder;
+		 string crownFolder;
+		 string intensityFolder;
+		 string cfbFolder;
+		 string flFolder;
 		 string historyFolder;
-
+	
 		 // Vectors
 		 std::vector<int> fire_period;
 		 std::vector<std::vector<int>> coordCells;
@@ -112,7 +117,7 @@ class Cell2Fire {
 		// Methods
 		void InitCell(int id);
         void reset(int rnumber, double rnumber2, int simExt);
-		bool RunIgnition(std::default_random_engine generator,int ep);
+		bool RunIgnition(std::default_random_engine generator, int ep);
 		std::unordered_map<int, std::vector<int>> SendMessages();
 		void GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList);
 		void Results();
