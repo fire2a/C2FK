@@ -363,7 +363,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	else args_ptr->ROSCV = dROSCV;
 	
 	//--ROS-CV
-	char * FMC = getCmdOption(argv, argv + argc, "--FMC");
+	char * FMC = getCmdOption(argv, argv + argc, "--fmc");
     if (FMC){
         printf("FMC: %s \n", FMC);
 		args_ptr->FMC = std::stoi (FMC ,&sz); 

@@ -1,4 +1,5 @@
 # coding: utf-8
+
 __version__ = "1.0"
 __author__ = "Cristobal Pais"
 
@@ -76,9 +77,9 @@ def ParseInputs():
                         dest="gridsFreq",
                         type=int,
                         default=-1)
-    parser.add_argument("--FMC",
+    parser.add_argument("--fmc",
                         help="Foliar Moisture Content",
-                        dest="FMC",
+                        dest="fmc",
                         type=int,
                         default=120)
     
