@@ -1,10 +1,9 @@
 numpy
 pandas
-matplotlib==3.5.2
+matplotlib
+Pillow
 seaborn
-imread
 tqdm
-
 networkx
 rasterio
 scipy
