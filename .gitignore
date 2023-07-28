@@ -56,3 +56,5 @@ venv/
 *.htm
 /Cell2FireC/x64
 *.pdb
+/data/*/results
+/data/*/Data.csv
