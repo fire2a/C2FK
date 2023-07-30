@@ -78,7 +78,7 @@ class Cell2FireC:
                    '--bbo' if (self.args.BBO) else '',
                    '--FirebreakCells', self.args.HCells if(self.args.HCells is not None) else '',
                    '--cros' if (self.args.cros) else '',
-                   '--FMC', str(int(self.args.FMC)),
+                   '--fmc', str(int(self.args.fmc)),
                    #'--ROS10Factor', str(self.args.ROS10Factor),
                    #'--CCFFactor', str(self.args.CCFFactor),
                    #'--CBDFactor', str(self.args.CBDFactor),
