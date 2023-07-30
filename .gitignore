@@ -30,15 +30,10 @@
 *.out
 *.app
 
-#custom files
-
-*.swp
+# custom files
 .DS_Store
-.gitattributes
 .vscode
 .vs
-Cell2fire/__pycache__
-Cell2FireC/Cell2Fire
 
 # python
 .ipynb_checkpoints/
@@ -49,12 +44,16 @@ venv/
 
 # vim
 .netrwhist
-*swp
-*swo
+*sw[pon]
 *~
 
 *.htm
 /Cell2FireC/x64
 *.pdb
+
 /data/*/results
 /data/*/Data.csv
+/data/*/*.qgz
+/data/*/*.aux.xml
+/data/*/Instance*
+
