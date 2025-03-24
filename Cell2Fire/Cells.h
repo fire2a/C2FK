@@ -2,7 +2,6 @@
 #define CELLS
 
 // include stuff
-#include "Ellipse.h"
 #include "ReadArgs.h"
 
 #include <math.h>
@@ -118,10 +117,8 @@ class Cells
     void initializeFireFields(std::vector<std::vector<int>>& coordCells,
                               std::unordered_set<int>& availSet,
                               int cols,
-                              int rows);  // TODO: need TYPE
-    void ros_distr_old(double thetafire, double forward, double flank, double back);
+                              int rows);
     double rhoTheta(double theta, double a, double b);
-    void ros_distr(double thetafire, double forward, double flank, double back, double EFactor);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 
     std::vector<int> manageFire(int period,

@@ -20,7 +20,7 @@ PATH=../Cell2Fire:$PATH
 # run
 set -x # enable debug tracing
 for format in asc tif; do
-      output_folder=test_results/$model-$format
+      output_folder=test_results/kitral-$format
       mkdir -p $output_folder
       rm -rf $output_folder/*
       Cell2Fire$1 --input-instance-folder model/kitral-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim K --seed 123 --ignitionsLog > test_results/kitral-$format/log.txt

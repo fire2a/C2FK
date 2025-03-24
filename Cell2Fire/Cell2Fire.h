@@ -4,12 +4,8 @@
 // Headers
 #include "Cells.h"
 #include "DataGenerator.h"
-#include "FuelModelKitral.h"
-#include "FuelModelSpain.h"
-#include "Lightning.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
-#include "Spotting.h"
 #include "WriteCSV.h"
 
 // Include libraries
