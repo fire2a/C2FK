@@ -17,6 +17,9 @@
 // Initialize coefficients
 void setup_const();
 
+// Initialized raster data
+void setup_crown_const(inputs* data);
+
 // Calculate flank fire
 float flankfire_ros_k(float ros, float bros, float lb);
 
@@ -29,11 +32,8 @@ float l_to_b(float ws, fuel_coefs*);
 // BROS
 float backfire_ros_k(main_outs* at, snd_outs* sec);
 
-// Flame length [m])
+// Flame length [m]
 float flame_length(inputs* data, main_outs* at);
-
-// Crown Flame length [m])
-float crown_flame_length_k(float intensity);
 
 // Angle of the flame w.r.t. horizontal surface (Putnam's)
 float angleFL(inputs* data, main_outs* at);
@@ -41,11 +41,11 @@ float angleFL(inputs* data, main_outs* at);
 // Transformation from FL to FH using angle
 float flame_height(inputs* data, main_outs* at);
 
+// Crown flame length [m]
+float crown_flame_length_k(float intensity);
+
 // byram intensity
 float byram_intensity(inputs* data, main_outs* at);
-
-// crown byram intensity
-float crown_byram_intensity_k(main_outs* at, inputs* data);
 
 // Type of fire (Crown = 1, SROS = 0)
 bool fire_type(inputs* data, main_outs* atr, int FMC);
@@ -54,7 +54,7 @@ bool checkActive(inputs* data, main_outs* at, int FMC);
 // CROS adjustements
 float final_rate_of_spreadPL04(main_outs* at);
 float active_rate_of_spreadPL04(inputs* data,
-                                main_outs* at);  // En KITRAL SE USA PL04
+                                main_outs* at); // En KITRAL SE USA PL04
 float crownfractionburn(inputs* data, main_outs* at, int FMC);
 
 // Back fire with CROS
