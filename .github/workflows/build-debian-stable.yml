@@ -22,12 +22,12 @@ jobs:
       - name: Install Dependencies
         run: |
           apt update
-          apt install -y g++-12 make lsb-release unzip libboost-all-dev libtiff-dev
+          apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev catch2
 
       - name: Check Packages Versions
         if: false
         run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libtiff-dev > new_pkgs_debian.txt
+          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev catch2 > new_pkgs_debian.txt
           if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
             echo "::warning:: apt packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
             diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_debian.txt pkgs_debian.txt || true)
@@ -72,8 +72,20 @@ jobs:
       - name: Install Dependencies
         run: |
           apt update
-          apt install -y lsb-release unzip libtiff6 libgomp1
-          # apt install -y g++-12 make lsb-release unzip libboost-all-dev libtiff-dev
+          apt install -y g++-12 make lsb-release unzip libtiff6 libgomp1 libeigen3-dev curl
+
+      - name: Cache Catch2 header
+        uses: actions/cache@v3
+        with:
+          path: catch.hpp
+          key: ${{ runner.os }}-catch2
+
+      - name: Download Catch2 header
+        run: |
+          if [ ! -f /usr/include/catch2/catch.hpp ]; then
+            mkdir  /usr/include/catch2
+            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/include/catch2/catch.hpp
+          fi
 
       - name: Get Environment
         id: get_env
@@ -95,7 +107,12 @@ jobs:
           ls Cell2Fire
           chmod +x Cell2Fire/Cell2Fire*
 
-      - name: Test
+      - name: Unit Test
+        run: |
+          cd Cell2Fire
+          make tests
+
+      - name: Bash Test
         run: |
           cd test
           bash test.sh ${{ env.SUFFIX }}
