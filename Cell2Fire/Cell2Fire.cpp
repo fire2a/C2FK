@@ -2462,7 +2462,7 @@ main(int argc, char* argv[])
     arguments args;
     arguments* args_ptr = &args;
     parseArgs(argc, argv, args_ptr);
-    GenDataFile(args.InFolder, args.Simulator);
+    GenDataFile(args.InFolder);
     int ep = 0;
     int tstep = 0;
     int stop = 0;

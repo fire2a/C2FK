@@ -488,82 +488,15 @@ CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
         else
             ws = std::stof(DF[i][2], &sz);
 
-        if (args_ptr->Simulator == "K")
-        {
-            if (DF[i][4].compare("") == 0)
-                tmp = 0;
-            else
-                tmp = std::stof(DF[i][4], &sz);
+        if (DF[i][4].compare("") == 0)
+            tmp = 0;
+        else
+            tmp = std::stof(DF[i][4], &sz);
 
-            if (DF[i][5].compare("") == 0)
-                rh = 0;
-            else
-                rh = std::stof(DF[i][5], &sz);
-        }
-        else if (args_ptr->Simulator == "C")
-        {
-
-            if (DF[i][6].compare("") == 0)
-                waz = 0;
-            else
-            {
-                waz = std::stoi(DF[i][6],
-                                &sz);  //+ 180/2;   // DEBUGGING THE ANGLE
-                if (waz >= 360)
-                {
-                    waz = waz - 360;
-                }
-            }
-            if (DF[i][2].compare("") == 0)
-                apcp = 0;
-            else
-                apcp = std::stof(DF[i][2], &sz);
-
-            if (DF[i][3].compare("") == 0)
-                tmp = 0;
-            else
-                tmp = std::stof(DF[i][3], &sz);
-
-            if (DF[i][4].compare("") == 0)
-                rh = 0;
-            else
-                rh = std::stof(DF[i][4], &sz);
-
-            if (DF[i][5].compare("") == 0)
-                ws = 0;
-            else
-                ws = std::stof(DF[i][5], &sz);
-
-            if (DF[i][7].compare("") == 0)
-                ffmc = 0;
-            else
-                ffmc = std::stof(DF[i][7], &sz);
-
-            if (DF[i][8].compare("") == 0)
-                dmc = 0;
-            else
-                dmc = std::stof(DF[i][8], &sz);
-
-            if (DF[i][9].compare("") == 0)
-                dc = 0;
-            else
-                dc = std::stof(DF[i][9], &sz);
-
-            if (DF[i][10].compare("") == 0)
-                isi = 0;
-            else
-                isi = std::stof(DF[i][10], &sz);
-
-            if (DF[i][11].compare("") == 0)
-                bui = 0;
-            else
-                bui = std::stof(DF[i][11], &sz);
-
-            if (DF[i][12].compare("") == 0)
-                fwi = 0;
-            else
-                fwi = std::stof(DF[i][12], &sz);
-        }
+        if (DF[i][5].compare("") == 0)
+            rh = 0;
+        else
+            rh = std::stof(DF[i][5], &sz);
 
         // Set values
         wdf_ptr->ws = ws;
