@@ -233,7 +233,6 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     int diradius = 0;
     int dnthreads = 1;
     int dfmc = 100;
-    int dscen = 3;
     float dROS_Threshold = 0.1;
     float dHFI_Threshold = 0.1;
     float dCROS_Threshold = 0.5;
@@ -271,30 +270,6 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     }
     else
         args_ptr->TotalSims = dnsims;
-
-    //--nsims
-    char* simulator_option = getCmdOption(argv, argv + argc, "--sim");
-    if (simulator_option)
-    {
-        std::string s = simulator_option;
-        if (s != "S" && s != "K" && s != "C")
-        {
-            printf("%s Simulator Option not recognized or not developed, using "
-                   "S&B as default!!! \n",
-                   simulator_option);
-            args_ptr->Simulator = simulator_option;
-        }
-        else
-        {
-            printf("Simulator: %s \n", simulator_option);
-            args_ptr->Simulator = simulator_option;
-        }
-    }
-    else
-    {
-        printf("No Simulator Option Selected, using S&B as default!!! \n");
-        args_ptr->Simulator = "S";
-    }
 
     //--Weather-Period-Length
     char* weather_period_len = getCmdOption(argv, argv + argc, "--Weather-Period-Length");
@@ -364,15 +339,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         args_ptr->FMC = dfmc;
 
-    //--scenario
-    char* input_scenario = getCmdOption(argv, argv + argc, "--scenario");
-    if (input_scenario)
-    {
-        printf("scenario: %s \n", input_scenario);
-        args_ptr->scenario = std::stoi(input_scenario, &sz);
-    }
-    else
-        args_ptr->scenario = dscen;
+
 
     //--ROS-Threshold
     char* ROS_Threshold = getCmdOption(argv, argv + argc, "--ROS-Threshold");
@@ -602,7 +569,6 @@ printArgs(arguments args)
 {
 
     /*
-    std::cout << "Simulator: "<<args.Simulator<<std::endl;
     std::cout << "InFolder: " << args.InFolder << std::endl;
     std::cout << "OutFolder: " << args.OutFolder << std::endl;
     std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
@@ -633,7 +599,6 @@ printArgs(arguments args)
     std::cout << "nthreads: " << args.nthreads << std::endl;
     */
 
-    std::cout << "Simulator: " << args.Simulator << std::endl;
     std::cout << "InFolder: " << args.InFolder << std::endl;
     std::cout << "OutFolder: " << args.OutFolder << std::endl;
     std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
