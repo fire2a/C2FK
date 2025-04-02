@@ -1,31 +1,20 @@
-# C2F+K: A new open-source wildfire simulator for Chile
-## Jaime Carrasco, Cristóbal Pais, David Palacios, Felipe Soto, Rodrigo Mahaluf, Horacio Gilabert, Alejandro Miranda, Gabriela Alfaro, Miguel Castillo, and Andrés Weintraub
+# C2F+K: New Extensions of Cell2Fire Software for Fire Risk Analysis and Evaluation in Chilean Forests
+## Jaime Carrasco, José Ramón González, Felipe Soto, David Palacios, Rodrigo Mahaluf, Felipe de la Barra, Carolina Espinoza, Matías Vilches, Matilde Rivas, Fernando Badilla, Horacio Gilabert, Miguel Castillo, Jorge Saavedra, Jordi Garcia-Gonzalo and Andrés Weintraub
 
 # Disclaimer
 This software is for research use only. There is no warranty of any kind; there is not even the implied warranty of fitness for use.
 
 # Introduction
-Wildfire spatial simulation has proven to be a useful tool for fire management, both for preventive planning and suppression. However, these tools are not always publicly available, and those that exist require restrictive/limited licenses or belong to private companies or government institutions. In this repository, we present an open-source computational tool to simulate the growth of fires that can occur in any region of Chile, and has the potential to estimate burn probability maps which requires an iterative and concatenated process of spatially explicit simulation of fire ignition, and fire growth scenarios. This system -- C2F+K -- is based on the Cell2Fire simulator and the Chilean fire behavior system, KITRAL. Our implementation proposes new equations for the calculation of the rate of spread and length-to-breadth ratio as a function of wind speed, based on an elliptical shape model; we also incorporate a model of crown fire behavior validated with numerical experiments. We illustrate its performance comparing it to real and simulated wildfires using the KITRAL software. C2F+K features cross-platform compatibility and flexibility, which allows taking advantage of parallel computing in fire growth modeling and generating risk maps from multiple stochastic simulations.
+Spatial simulation of wildfires has proven to be a valuable tool for fire management, supporting both preventive planning and operational suppression. However, many of these tools are not publicly available; those that do exist often require restrictive licenses or are controlled by private companies or government agencies.  In this paper, we present an open-source computational tool capable of simulating fire growth across any region in Chile. This tool, called C2F+K, can be used iteratively to produce spatially explicit simulations of fire ignitions under various scenarios, enabling the generation of burn probability maps.  C2F+K builds on the Cell2Fire simulator and incorporates the Chilean fire behavior system, KITRAL. Our implementation introduces new equations for calculating the rate of spread and length-to-breadth ratio based on wind speed using an elliptical fire shape model. Additionally, it includes a crown fire behavior model. We demonstrate its capabilities by comparing results with both real and simulated wildfires using KITRAL. C2F+K is cross-platform and flexible, leveraging parallel computing for fire growth modeling and supporting the creation of risk maps through large-scale stochastic simulations.
 
 # Installation
-Installation may require some familiarity with C++, make, and Python.
-* cd C2FK/Cell2FireC
-* (edit Makefile to have the correct path to Eigen)
+Installation may require some familiarity with C++, make
+* cd C2FK/Cell2Fire
 * make
 * cd .. 
-* pip install -r requirements.txt
 
 # Requirements
 - Boost (C++)
-- Eigen (C++)
-- Python 3.6
-- numpy
-- pandas
-- matplotlib
-- seaborn
-- tqdm
-- rasterio
-- networkx (for stats module)
 
 # Illustrative examples
 A tutorial can be found at [C2F+K Tutorial](https://docs.google.com/presentation/d/1Y6fPAhDrSThGSvYFvqdccXTvVrUcvbHZsDLAwbfMD18/edit?usp=sharing)
