@@ -98,6 +98,6 @@ We are a research group that seeks solutions to complex problems arising from th
 
 Currently hosted at [ISCI](https://isci.cl/) offices.
 
-Contact us at fire2a@fire2a.com.
+Contact us on [Discord](https://discord.gg/A5jwWJKT).
 
 Visit our [public webpage](http://www.fire2a.com/).
