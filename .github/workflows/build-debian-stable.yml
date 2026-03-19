@@ -116,3 +116,8 @@ jobs:
         run: |
           cd test
           bash test.sh ${{ env.SUFFIX }}
+
+      - name: SpreadRad Test
+        run: |
+          cd test
+          bash spreadrad_test.sh ${{ env.SUFFIX }}

@@ -39,6 +39,7 @@ There are many command line options available to configure the simulation.
 | nthreads              | int    | Defines the number of threads to use for simulations. Default is 1.                                   |
 | seed                  | int    | Seed for the random generator.                                                                        |
 | IgnitionRad           | int    | If greater than 0, picks a point on the circumference of radius = IgnitionRadius from ignition point. |
+| SpreadRad             | int    | Fire spread neighborhood radius. `1` uses immediate neighbors; larger values include additional tiers. |
 | nweathers             | int    | Number of weather files. Used to randomly select one.                                                 |
 | CCFFactor             | float  | Weighs by the cell’s CCF when calculating crown ROS in S&B. Default is 0.                             |
 | EFactor               | float  | Weighs radial distance from the ellipse center. Default is 1.0.                                       |
@@ -63,6 +64,15 @@ There are many command line options available to configure the simulation.
 | out-intensity         | bool   | Saves Byram fire intensities.                                                                         |
 | out-fl                | bool   | Saves flame length results. In S&B, saves surface, crown, and max.                                    |
 | output-messages       | bool   | Saves file with messages (origin, destination, time, ROS).                                            |
+
+### Spread Neighborhood Radius (`--SpreadRad`)
+`--SpreadRad` controls how far a burning cell can send spread messages in one neighborhood layer definition:
+
+- `--SpreadRad 1`: immediate neighborhood (legacy behavior)
+- `--SpreadRad 2`: includes one additional ring of neighbors
+- in general, interior cells have `(2n+1)^2 - 1` candidates for radius `n`
+
+The spread model keeps the original assumption that outgoing spread from source cell `i` uses the ROS computed at source cell `i` for all candidate destination cells.
 
 
 # Output examples
