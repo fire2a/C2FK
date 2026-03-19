@@ -13,7 +13,7 @@
 
 using namespace std;
 
-std::vector<int> adjacentCells(int cell, int nrows, int ncols);
+std::vector<int> adjacentCells(int cell, int nrows, int ncols, int radius = 1);
 /*
  *   Weather structure
  */
@@ -96,11 +96,8 @@ class Cells
     std::unordered_map<int, std::vector<int>> gMsgListSeason;
     std::unordered_map<int, double> fireProgress;  // CP: dictionary {int: double}
     std::unordered_map<int, double> angleDict;     // CP: dictionary {int: double}
-    std::unordered_map<int, double> ROSAngleDir;   // CP: dictionary {int: double|None}   Instead of None we
-                                                   // can use a determined number like -9999 = None  TODO:
-                                                   // maybe int : double
+    std::unordered_map<int, double> ROSAngleDir;   // dictionary {neighbor id: ROS from this source cell}
     std::unordered_map<int, double> distToCenter;  // CP: dictionary {int: double}
-    std::unordered_map<int, int> angleToNb;        // CP: dictionary {double: int}
 
     // TODO: reference to shared object
 
@@ -117,7 +114,8 @@ class Cells
     void initializeFireFields(std::vector<std::vector<int>>& coordCells,
                               std::unordered_set<int>& availSet,
                               int cols,
-                              int rows);
+                              int rows,
+                              int spreadRadius);
     double rhoTheta(double theta, double a, double b);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 
@@ -198,6 +196,7 @@ class Cells
   private:
     double allocate(double offset, double base, double ros1, double ros2);
     float slope_effect(float elev_i, float elev_j, int cellsize);
+    int selectHeadCell(double windAzimuth) const;
 };
 
 #endif
