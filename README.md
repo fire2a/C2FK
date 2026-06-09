@@ -1,5 +1,19 @@
 # C2FK: New Extensions of Cell2Fire Software for Fire Risk Analysis and Evaluation in Chilean Forests
-## Jaime Carrasco, José Ramón González, Felipe Soto, David Palacios, Rodrigo Mahaluf, Felipe de la Barra, Carolina Espinoza, Matías Vilches, Matilde Rivas, Fernando Badilla, Horacio Gilabert, Miguel Castillo, Jorge Saavedra, Jordi Garcia-Gonzalo and Andrés Weintraub
+## Jaime Carrasco-Barra<sup>a,c,*</sup>, José Ramón González-Olabarria<sup>j</sup>, Camilo Matus-Olivares<sup>a</sup>,   Felipe Ulloa-Fierro<sup>d,e</sup>, Felipe Soto<sup>f</sup>, David Palacios<sup>c</sup>, Rodrigo Mahaluf<sup>c</sup>, Felipe de la Barra<sup>c</sup>,   Carolina Espinoza<sup>h</sup>, Matías Vilches<sup>c</sup>, Matilde Rivas<sup>c</sup>, Fernando Badilla<sup>c</sup>, Horacio Gilabert<sup>g</sup>,   Miguel Castillo<sup>f</sup>, Jorge Saavedra<sup>i</sup>, Fulgencio Lisón<sup>k</sup>, Jordi Garcia-Gonzalo<sup>j</sup> and   Andrés Weintraub<sup>b,c</sup>
+
+<sup>a</sup> Universidad Tecnológica Metropolitana, Departamento de Industria, Santiago, Chile  
+<sup>b</sup> University of Chile, Industrial Engineering Department, Santiago, Chile  
+<sup>c</sup> Complex Engineering System Institute - ISCI, Santiago, Chile  
+<sup>d</sup> Department of Industrial Engineering, Faculty of Engineering, Universidad de Talca, Sede Curicó, Chile  
+<sup>e</sup> Programa Doctorado en Ingeniería, Facultad de Ingeniería, Universidad de Talca, Sede Curicó, Chile  
+<sup>f</sup> Forest Fire Laboratory, University of Chile, Box 9206, Santiago, Chile  
+<sup>g</sup> Centro de Cambio Global, Pontificia Universidad Católica de Chile, Santiago, Chile  
+<sup>h</sup> University of Chile, Department of Geophysics, Santiago, Chile  
+<sup>i</sup> Forest Fire Analysis and Prediction Section, Corporación Nacional Forestal, Santiago, Chile  
+<sup>j</sup> Forest Science and Technology Centre of Catalonia, Solsona, Spain  
+<sup>k</sup> Ecosistemas Mediterráneos (ECOMED), Departamento de Ecología e Hidrología, Facultad de Biología, Universidad de Murcia, Campus de Espinardo, 30100, Murcia, Spain  
+
+<sup>*</sup> Corresponding author.
 
 # Disclaimer
 This software is for research use only. There is no warranty of any kind; there is not even the implied warranty of fitness for use.
